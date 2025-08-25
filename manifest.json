@@ -1,20 +1,31 @@
 {
   "manifest_version": 3,
-  "name": "CSWatch",
-  "version": "1.0",
-  "description": "Chrome and Chromium-based extension that displays CSWatch stats directly on the Steam profile",
-  "permissions": ["scripting", "activeTab"],
+  "name": "CSWatch Stats Viewer",
+  "version": "0.9.0",
+  "description": "Muestra estadísticas de CSWatch en el perfil de Steam.",
+  "icons": {
+    "16": "imgs/logo16.png",
+    "48": "imgs/logo48.png",
+    "128": "imgs/logo128.png"
+  },
   "action": {
     "default_popup": "src/popup.html",
     "default_icon": {
-      "128": "imgs/icon128.png"
+      "16": "imgs/logo16.png",
+      "48": "imgs/logo48.png",
+      "128": "imgs/logo128.png"
     }
   },
   "content_scripts": [
     {
-      "run_at": "document_end",
-      "matches": ["https://steamcommunity.com/*"],
-      "js": ["src/content.js"]
+      "matches": ["*://steamcommunity.com/id/*", "*://steamcommunity.com/profiles/*"],
+      "js": ["src/scripts/content.js"],
+      "css": ["src/styles/content.css"]
     }
+  ],
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting"
   ]
 }
