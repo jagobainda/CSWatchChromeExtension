@@ -1,0 +1,40 @@
+.profile-customization-header-content {
+    display:flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.profile-customization-header-title {
+    display:flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.cs-watch-logo {
+    width: 30px;
+    height: 30px;
+}
+
+.cs-watch-link-title {
+    display:flex;
+    flex-direction: row;
+    gap: 5px;
+    align-items: center;
+    font-weight: 400;
+}
+
+.copy-cs-watch-stats-to-clipboard {
+    color: #ababab;
+    background: #16161670;
+    font-size: 12px;
+    text-transform: uppercase;
+    padding: 0 13px;
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+.copy-cs-watch-stats-to-clipboard:hover {
+    color: #fff;
+    background: #161616;
+    cursor: crosshair;
+}
