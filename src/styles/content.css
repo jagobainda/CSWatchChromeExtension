@@ -23,6 +23,17 @@
     font-weight: 400;
 }
 
+.is-autoflagged {
+    color: #e71c1d;
+    background: #16161670;
+    font-size: 12px;
+    text-transform: uppercase;
+    padding: 0 13px;
+    border-radius: 6px;
+    font-weight: 500;
+    display: none;
+}
+
 .copy-cs-watch-stats-to-clipboard {
     color: #ababab;
     background: #16161670;
@@ -36,7 +47,7 @@
 .copy-cs-watch-stats-to-clipboard:hover {
     color: #fff;
     background: #161616;
-    cursor: crosshair;
+    cursor: pointer;
 }
 
 .cs-watch-stats-container {

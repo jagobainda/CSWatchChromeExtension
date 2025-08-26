@@ -23,6 +23,20 @@
         "*://steamcommunity.com/profiles/*"
       ],
       "js": [
+        "src/scripts/background.js"
+      ],
+      "css": [
+        "src/styles/content.css"
+      ],
+      "world": "MAIN",
+      "run_at": "document_end"
+    },
+    {
+      "matches": [
+        "*://steamcommunity.com/id/*",
+        "*://steamcommunity.com/profiles/*"
+      ],
+      "js": [
         "src/scripts/content.js"
       ],
       "css": [
@@ -31,14 +45,23 @@
     }
   ],
   "permissions": [
-    "storage",
+    "scripting",
     "activeTab",
-    "scripting"
+    "storage"
+  ],
+  "host_permissions": [
+    "*://steamcommunity.com/*",
+    "*://cswatch.in/api/*"
   ],
   "web_accessible_resources": [
     {
-      "resources": ["imgs/*.png"],
+      "resources": [
+        "imgs/*.png"
+      ],
       "matches": ["*://steamcommunity.com/*"]
     }
-  ]
+  ],
+  "background": {
+    "service_worker": "src/scripts/service-worker.js"
+  }
 }
