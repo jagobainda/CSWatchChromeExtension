@@ -22,6 +22,8 @@ async function loadUserStats() {
     const userId = getUserId();
 
     console.log(userId);
+
+    // TODO: Load user stats from API
 }
 
 function getUserId() {
@@ -95,7 +97,7 @@ function createTemplate() {
     kdRatioContainer.className = 'cs-watch-stats-item';
 
     const kdRatio = document.createElement('span');
-    kdRatio.innerText = '1.00';
+    kdRatio.innerText = '1.10';
     kdRatio.id = 'cs-watch-stats-kd-ratio';
     kdRatio.className = 'cs-watch-stats-item-value';
 
