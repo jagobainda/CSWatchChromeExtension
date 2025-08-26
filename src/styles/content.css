@@ -38,3 +38,29 @@
     background: #161616;
     cursor: crosshair;
 }
+
+.cs-watch-stats-container {
+    padding: 15px !important;
+    height: auto;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 20px;
+}
+
+.cs-watch-stats-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.cs-watch-stats-item-value {
+    font-size: 16px;
+    color: #fff;
+}
+
+.cs-watch-stats-item-label {
+    font-size: 11px;
+    color: #afafaf;
+    text-transform: uppercase;
+}
