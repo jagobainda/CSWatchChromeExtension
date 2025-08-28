@@ -43,9 +43,7 @@
     }
   ],
   "permissions": [
-    "scripting",
-    "activeTab",
-    "storage"
+    "activeTab"
   ],
   "host_permissions": [
     "*://steamcommunity.com/*",
