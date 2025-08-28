@@ -25,9 +25,6 @@
       "js": [
         "src/scripts/background.js"
       ],
-      "css": [
-        "src/styles/content.css"
-      ],
       "world": "MAIN",
       "run_at": "document_end"
     },
@@ -40,7 +37,8 @@
         "src/scripts/content.js"
       ],
       "css": [
-        "src/styles/content.css"
+        "src/styles/content.css",
+        "src/styles/custom-classes.css"
       ]
     }
   ],

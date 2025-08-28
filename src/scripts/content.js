@@ -1,28 +1,6 @@
 /// <reference types="chrome"/>
 
-(async () => {
-    const template = createTemplate();
-
-    const profileCustomizationArea = document.querySelector('.profile_customization_area');
-    const profileLeftcol = document.querySelector('.profile_leftcol');
-
-    setTimeout(() => {
-        if (profileCustomizationArea) profileCustomizationArea.insertBefore(template, profileCustomizationArea.firstChild);
-        if (!profileCustomizationArea && profileLeftcol) profileLeftcol.insertBefore(template, profileLeftcol.firstChild);
-
-        setEventListeners();
-        loadUserStats();
-    }, 50);
-})();
-
-function setEventListeners() {
-    const copyToClipboardDiv = document.getElementById('copy-cs-watch-stats-to-clipboard');
-    copyToClipboardDiv?.addEventListener('click', () => copyStatsToClipboard());
-
-
-}
-
-async function loadUserStats() {
+const loadUserStats = async () => {
     const userId = getUserId();
 
     if (!userId) {
@@ -47,7 +25,7 @@ async function loadUserStats() {
     );
 }
 
-function getUserId() {
+const getUserId = () => {
     const steamIdSpan = document.getElementById('steam-id-hidden');
 
     if (!steamIdSpan) return null;
@@ -55,13 +33,13 @@ function getUserId() {
     return steamIdSpan.innerText;
 }
 
-function showAutoflagged() {
+const showAutoflagged = () => {
     const container = document.getElementById('is-autoflagged');
 
     container.style.display = 'block';
 }
 
-function displayStats(data, totalScore) {
+const displayStats = (data, totalScore) => {
     const kdRatio = document.getElementById('cs-watch-stats-kd-ratio');
     const timeToDamage = document.getElementById('cs-watch-stats-time-to-damage');
     const preaimDegree = document.getElementById('cs-watch-stats-preaim-degree');
@@ -71,15 +49,59 @@ function displayStats(data, totalScore) {
 
     if (!kdRatio || !timeToDamage || !preaimDegree || !aimRating || !winRate || !riskRate) return
 
-    kdRatio.innerText = data.find(item => item.type === 'kd').value;
-    timeToDamage.innerText = data.find(item => item.type === 'reaction').value + " ms";
-    preaimDegree.innerText = data.find(item => item.type === 'preaim').value + "º";
-    aimRating.innerText = data.find(item => item.type === 'aim').value + " %";
-    winRate.innerText = data.find(item => item.type === 'winrate').value + " %";
+    const kdRatioObject = data.find(item => item.type === 'kd');
+    const timeToDamageObject = data.find(item => item.type === 'reaction');
+    const preaimDegreeObject = data.find(item => item.type === 'preaim');
+    const aimRatingObject = data.find(item => item.type === 'aim');
+    const winRateObject = data.find(item => item.type === 'winrate');
+
+    kdRatio.innerText = kdRatioObject.value;
+    timeToDamage.innerText = timeToDamageObject.value + " ms";
+    preaimDegree.innerText = preaimDegreeObject.value + "º";
+    aimRating.innerText = aimRatingObject.value + " %";
+    winRate.innerText = winRateObject.value + " %";
     riskRate.innerText = totalScore + " %";
+
+    kdRatio.classList.add(getV11MetricMessage(kdRatioObject.score).color);
+    timeToDamage.classList.add(getV11MetricMessage(timeToDamageObject.score).color);
+    preaimDegree.classList.add(getV11MetricMessage(preaimDegreeObject.score).color);
+    aimRating.classList.add(getV11MetricMessage(aimRatingObject.score).color);
+    winRate.classList.add(getV11MetricMessage(winRateObject.score).color);
+
+    kdRatio.title = getV11MetricMessage(kdRatioObject.score).text;
+    timeToDamage.title = getV11MetricMessage(timeToDamageObject.score).text;
+    preaimDegree.title = getV11MetricMessage(preaimDegreeObject.score).text;
+    aimRating.title = getV11MetricMessage(aimRatingObject.score).text;
+    winRate.title = getV11MetricMessage(winRateObject.score).text;
+
+    riskRate.classList.add(getV11RiskLevel(totalScore).color);
+    riskRate.title = getV11RiskLevel(totalScore).text;
 }
 
-function showError(message) {
+const createColorScheme = (baseColor) => ({
+    color: `text-${baseColor}-500`,
+    bgColor: `bg-${baseColor}-500/20`,
+    borderColor: `border-${baseColor}-500`
+});
+
+const getV11RiskLevel = (score) => {
+    if (score >= 98) return { text: "Extremely High Risk", ...createColorScheme("red") };
+    if (score >= 90) return { text: "Very High Risk", ...createColorScheme("red") };
+    if (score >= 75) return { text: "High Risk", ...createColorScheme("orange") };
+    if (score >= 50) return { text: "Medium Risk", ...createColorScheme("orange") };
+    if (score >= 25) return { text: "Low Risk", ...createColorScheme("yellow") };
+    return { text: "Very Low Risk", ...createColorScheme("green") };
+};
+
+const getV11MetricMessage = (score) => {
+    if (score >= 100) return { text: "Extremely Suspicious", color: "text-red-500" };
+    if (score >= 80) return { text: "Highly Suspicious", color: "text-red-500" };
+    if (score >= 60) return { text: "Suspicious", color: "text-orange-500" };
+    if (score >= 50) return { text: "Little Suspicious", color: "text-yellow-500" };
+    return { text: "Normal", color: "text-green-500" };
+};
+
+const showError = (message) => {
     const container = document.getElementById('cs-watch-stats-container');
 
     if (!container) return;
@@ -92,7 +114,7 @@ function showError(message) {
     container.appendChild(error);
 }
 
-async function copyStatsToClipboard() {
+const copyStatsToClipboard = async () => {
     const kdRatio = document.getElementById('cs-watch-stats-kd-ratio');
     const timeToDamage = document.getElementById('cs-watch-stats-time-to-damage');
     const preaimDegree = document.getElementById('cs-watch-stats-preaim-degree');
@@ -109,7 +131,7 @@ async function copyStatsToClipboard() {
     await navigator.clipboard.writeText(stats);
 }
 
-function createTemplate() {
+const createTemplate = () => {
     const container = document.createElement('div');
     container.id = 'cs-watch-container';
 
@@ -133,10 +155,10 @@ function createTemplate() {
     csWatchLogo.alt = 'CSWatch Logo';
 
     const csWatchLinkTitle = document.createElement('a');
-    csWatchLinkTitle.href = 'https://github.com/jagobainda/CSWatchChromeExtension';
     csWatchLinkTitle.target = '_blank';
     csWatchLinkTitle.innerText = 'CSWATCH.IN';
     csWatchLinkTitle.className = 'cs-watch-link-title';
+    csWatchLinkTitle.id = 'cs-watch-link-title';
 
     const isAutoflagged = document.createElement('div');
     isAutoflagged.innerText = 'Autoflagged';
@@ -274,3 +296,27 @@ function createTemplate() {
 
     return container;
 }
+
+const setEventListeners = () => {
+    const copyToClipboardDiv = document.getElementById('copy-cs-watch-stats-to-clipboard');
+    copyToClipboardDiv?.addEventListener('click', () => copyStatsToClipboard());
+
+    const csWatchLinkTitle = document.getElementById('cs-watch-link-title');
+    const userId = getUserId();
+    csWatchLinkTitle?.addEventListener('click', () => window.open(`https://cswatch.in/player/${userId}`, '_blank'));
+}
+
+(async () => {
+    const template = createTemplate();
+
+    const profileCustomizationArea = document.querySelector('.profile_customization_area');
+    const profileLeftcol = document.querySelector('.profile_leftcol');
+
+    setTimeout(() => {
+        if (profileCustomizationArea) profileCustomizationArea.insertBefore(template, profileCustomizationArea.firstChild);
+        if (!profileCustomizationArea && profileLeftcol) profileLeftcol.insertBefore(template, profileLeftcol.firstChild);
+
+        setEventListeners();
+        loadUserStats();
+    }, 50);
+})();
