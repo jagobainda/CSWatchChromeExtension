@@ -1,0 +1,63 @@
+{
+  "manifest_version": 3,
+  "name": "CSWatch Stats Viewer",
+  "version": "0.9.1",
+  "description": "Chrome and Chromium-based extension that displays CSWatch stats directly on the Steam profile",
+  "icons": {
+    "16": "imgs/logo16.png",
+    "48": "imgs/logo48.png",
+    "128": "imgs/logo128.png"
+  },
+  "action": {
+    "default_popup": "src/popup.html",
+    "default_icon": {
+      "16": "imgs/logo16.png",
+      "48": "imgs/logo48.png",
+      "128": "imgs/logo128.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://steamcommunity.com/id/*",
+        "*://steamcommunity.com/profiles/*"
+      ],
+      "js": [
+        "src/scripts/background.js"
+      ],
+      "world": "MAIN",
+      "run_at": "document_end"
+    },
+    {
+      "matches": [
+        "*://steamcommunity.com/id/*",
+        "*://steamcommunity.com/profiles/*"
+      ],
+      "js": [
+        "src/scripts/content.js"
+      ],
+      "css": [
+        "src/styles/content.css",
+        "src/styles/custom-classes.css"
+      ]
+    }
+  ],
+  "permissions": [
+    "activeTab"
+  ],
+  "host_permissions": [
+    "*://steamcommunity.com/*",
+    "*://cswatch.in/api/*"
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "imgs/*.png"
+      ],
+      "matches": ["*://steamcommunity.com/*"]
+    }
+  ],
+  "background": {
+    "scripts": ["src/scripts/service-worker.js"]
+  }
+}

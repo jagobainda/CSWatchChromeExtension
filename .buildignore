@@ -1,0 +1,12 @@
+.git/
+.gitignore
+node_modules/
+README.md
+LICENSE
+build.bat
+.buildignore
+*.zip
+.vscode/
+.idea/
+*.log
+.DS_Store
