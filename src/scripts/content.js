@@ -1,5 +1,7 @@
 /// <reference types="chrome"/>
 
+let responseData = null;
+
 const loadUserStats = async () => {
     const userId = getUserId();
 
@@ -20,7 +22,13 @@ const loadUserStats = async () => {
 
             if (isAutoflagged) showAutoflagged();
 
-            displayStats(response.data.csWatchAnalysis.breakdown, response.data.csWatchAnalysis.totalScore)
+            const hasFaceit = response.data.player.faceitInfo.player_id !== undefined;
+
+            if (hasFaceit) showFaceitFilter();
+
+            displayStats(response, true);
+
+            responseData = response;
         }
     );
 }
@@ -39,15 +47,36 @@ const showAutoflagged = () => {
     container.style.display = 'block';
 }
 
-const displayStats = (data, totalScore) => {
+const showFaceitFilter = () => {
+    const container = document.getElementById('faceit-filter-button');
+
+    container.style.display = 'block';
+}
+
+const displayStats = (responseObject, faceitAdjustment) => {
+    if (!responseObject) {
+        showError('Failed to fetch player data');
+        return;
+    }
+
+    const data = responseObject.data.csWatchAnalysis.breakdown;
+    const totalScore = responseObject.data.csWatchAnalysis.totalScore
+    const unadjustedScore = responseObject.data.csWatchAnalysis.unadjustedScore
+    const version = responseObject.data.csWatchAnalysis.version
+    const faceitAdjustmentValue = responseObject.data.csWatchAnalysis.faceitAdjustment
+
     const kdRatio = document.getElementById('cs-watch-stats-kd-ratio');
     const timeToDamage = document.getElementById('cs-watch-stats-time-to-damage');
     const preaimDegree = document.getElementById('cs-watch-stats-preaim-degree');
     const aimRating = document.getElementById('cs-watch-stats-aim-rating');
     const winRate = document.getElementById('cs-watch-stats-win-rate');
     const riskRate = document.getElementById('cs-watch-stats-risk-rate');
+    const analysisVersion = document.getElementById('analysis-version');
 
-    if (!kdRatio || !timeToDamage || !preaimDegree || !aimRating || !winRate || !riskRate) return
+    if (!kdRatio || !timeToDamage || !preaimDegree || !aimRating || !winRate || !riskRate || !analysisVersion) {
+        showError('Failed to fetch player data');
+        return;
+    }
 
     const kdRatioObject = data.find(item => item.type === 'kd');
     const timeToDamageObject = data.find(item => item.type === 'reaction');
@@ -60,23 +89,49 @@ const displayStats = (data, totalScore) => {
     preaimDegree.innerText = preaimDegreeObject.value + "º";
     aimRating.innerText = aimRatingObject.value + " %";
     winRate.innerText = winRateObject.value + " %";
-    riskRate.innerText = totalScore + " %";
+    riskRate.innerText = (faceitAdjustment ? totalScore : unadjustedScore) + " %";
+    analysisVersion.innerText = "v" + version;
 
-    kdRatio.classList.add(getV11MetricMessage(kdRatioObject.score).color);
-    timeToDamage.classList.add(getV11MetricMessage(timeToDamageObject.score).color);
-    preaimDegree.classList.add(getV11MetricMessage(preaimDegreeObject.score).color);
-    aimRating.classList.add(getV11MetricMessage(aimRatingObject.score).color);
-    winRate.classList.add(getV11MetricMessage(winRateObject.score).color);
+    const metrics = {
+        kdRatio,
+        timeToDamage,
+        preaimDegree,
+        aimRating,
+        winRate
+    };
 
-    kdRatio.title = getV11MetricMessage(kdRatioObject.score).text;
-    timeToDamage.title = getV11MetricMessage(timeToDamageObject.score).text;
-    preaimDegree.title = getV11MetricMessage(preaimDegreeObject.score).text;
-    aimRating.title = getV11MetricMessage(aimRatingObject.score).text;
-    winRate.title = getV11MetricMessage(winRateObject.score).text;
+    const scores = {
+        kdRatio: kdRatioObject,
+        timeToDamage: timeToDamageObject,
+        preaimDegree: preaimDegreeObject,
+        aimRating: aimRatingObject,
+        winRate: winRateObject
+    };
 
-    riskRate.classList.add(getV11RiskLevel(totalScore).color);
-    riskRate.title = getV11RiskLevel(totalScore).text;
+    const colorClasses = ["text-red-500", "text-orange-500", "text-yellow-500", "text-green-500"];
+
+    Object.keys(metrics).forEach(key => {
+        const el = metrics[key];
+        const scoreObj = scores[key];
+
+        el.classList.remove(...colorClasses);
+
+        const message = getV11MetricMessage(scoreObj.score, faceitAdjustment, faceitAdjustmentValue);
+
+        el.classList.add(message.color);
+        el.title = message.text;
+    });
+
+    riskRate.classList.add(getV11RiskLevel(faceitAdjustment ? totalScore : unadjustedScore).color);
+    riskRate.title = getV11RiskLevel(faceitAdjustment ? totalScore : unadjustedScore).text;
 }
+
+const switchFaceitFilter = () => {
+    const faceitFilterButton = document.getElementById('faceit-filter-button');
+    faceitFilterButton?.classList.toggle('filter-applied');
+
+    displayStats(responseData, faceitFilterButton?.classList.contains('filter-applied'));
+};
 
 const createColorScheme = (baseColor) => ({
     color: `text-${baseColor}-500`,
@@ -84,7 +139,9 @@ const createColorScheme = (baseColor) => ({
     borderColor: `border-${baseColor}-500`
 });
 
-const getV11RiskLevel = (score) => {
+const getV11RiskLevel = (score, applyFaceit, faceitAdjustmentValue) => {
+    score = Math.min(score, 100);
+    if (applyFaceit) score += faceitAdjustmentValue;
     if (score >= 98) return { text: "Extremely High Risk", ...createColorScheme("red") };
     if (score >= 90) return { text: "Very High Risk", ...createColorScheme("red") };
     if (score >= 75) return { text: "High Risk", ...createColorScheme("orange") };
@@ -93,7 +150,9 @@ const getV11RiskLevel = (score) => {
     return { text: "Very Low Risk", ...createColorScheme("green") };
 };
 
-const getV11MetricMessage = (score) => {
+const getV11MetricMessage = (score, applyFaceit, faceitAdjustmentValue) => {
+    score = Math.min(score, 100);
+    if (applyFaceit) score += faceitAdjustmentValue;
     if (score >= 100) return { text: "Extremely Suspicious", color: "text-red-500" };
     if (score >= 80) return { text: "Highly Suspicious", color: "text-red-500" };
     if (score >= 60) return { text: "Suspicious", color: "text-orange-500" };
@@ -160,10 +219,19 @@ const createTemplate = () => {
     csWatchLinkTitle.className = 'cs-watch-link-title';
     csWatchLinkTitle.id = 'cs-watch-link-title';
 
+    const headerComplementsContainer = document.createElement('div');
+    headerComplementsContainer.className = 'profile-customization-header-title';
+
     const isAutoflagged = document.createElement('div');
     isAutoflagged.innerText = 'Autoflagged';
     isAutoflagged.className = 'is-autoflagged';
     isAutoflagged.id = 'is-autoflagged';
+
+    const analysisVersion = document.createElement('span');
+    analysisVersion.className = 'analysis-version';
+    analysisVersion.id = 'analysis-version';
+    analysisVersion.innerText = 'v0.0';
+    analysisVersion.title = 'CSWatch Analysis Version';
 
     const copyToClipboard = document.createElement('div');
     copyToClipboard.innerText = 'Copy stats to clipboard';
@@ -249,6 +317,11 @@ const createTemplate = () => {
     riskRateLabel.innerText = 'Risk rate';
     riskRateLabel.className = 'cs-watch-stats-item-label';
 
+    const faceitFilterButton = document.createElement('button');
+    faceitFilterButton.innerText = 'FACEIT';
+    faceitFilterButton.className = 'faceit-filter-button filter-applied';
+    faceitFilterButton.id = 'faceit-filter-button';
+
     profileCustomization.appendChild(header);
 
     header.appendChild(headerContent);
@@ -256,7 +329,9 @@ const createTemplate = () => {
     headerTitle.appendChild(csWatchLogo);
     headerTitle.appendChild(csWatchLinkTitle);
     headerTitle.appendChild(isAutoflagged);
-    headerContent.appendChild(copyToClipboard);
+    headerContent.appendChild(headerComplementsContainer);
+    headerComplementsContainer.appendChild(analysisVersion);
+    headerComplementsContainer.appendChild(copyToClipboard);
 
     profileCustomization.appendChild(favoriteGroup);
 
@@ -292,6 +367,8 @@ const createTemplate = () => {
     riskRateContainer.appendChild(riskRate);
     riskRateContainer.appendChild(riskRateLabel);
 
+    favoriteGroupContent.appendChild(faceitFilterButton);
+
     container.appendChild(profileCustomization);
 
     return container;
@@ -304,6 +381,9 @@ const setEventListeners = () => {
     const csWatchLinkTitle = document.getElementById('cs-watch-link-title');
     const userId = getUserId();
     csWatchLinkTitle?.addEventListener('click', () => window.open(`https://cswatch.in/player/${userId}`, '_blank'));
+
+    const faceitFilterButton = document.getElementById('faceit-filter-button');
+    faceitFilterButton?.addEventListener('click', () => switchFaceitFilter());
 }
 
 (async () => {

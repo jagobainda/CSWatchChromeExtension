@@ -10,3 +10,6 @@ build.bat
 .idea/
 *.log
 .DS_Store
+endpoint-example.json
+TODOLIST.txt
+temp_build/
