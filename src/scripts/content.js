@@ -60,6 +60,12 @@ const displayStats = (responseObject, faceitAdjustment) => {
     }
 
     const data = responseObject.data.csWatchAnalysis.breakdown;
+
+    if (data.length < 1) {
+        showError(responseObject.data.csWatchAnalysis.message);
+        return;
+    }
+
     const totalScore = responseObject.data.csWatchAnalysis.totalScore
     const unadjustedScore = responseObject.data.csWatchAnalysis.unadjustedScore
     const version = responseObject.data.csWatchAnalysis.version
