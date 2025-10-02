@@ -16,7 +16,7 @@
 }
 
 .cs-watch-link-title {
-    display:flex;
+    display: flex;
     flex-direction: row;
     gap: 5px;
     align-items: center;
@@ -74,4 +74,46 @@
     font-size: 11px;
     color: #afafaf;
     text-transform: uppercase;
+}
+
+.faceit-filter-button {
+    background: #1f202c;
+    color: #a8a8a8;
+    border: 1px solid #1f202c;
+    border-radius: 100px;
+    height: 30px;
+    font-size: 13px;
+    margin: auto 0;
+    padding: 4px 12px;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    display: none;
+}
+
+.faceit-filter-button:hover {
+    background: #17181c;
+    color: #ffffff;
+}
+
+.filter-applied {
+    background: #ea580c;
+    color: #ffffff;
+}
+
+.filter-applied:hover {
+    background: #c2410c;
+    color: #ffffff;
+}
+
+.analysis-version {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #4ade80;
+    background-color: #16a34a33;
+    border: 1px solid #22c55e4d;
+    border-radius: .375rem;
+    font-size: .75rem;
+    line-height: 1rem;
+    padding: .25rem .5rem;
+    font-weight: 400;
 }

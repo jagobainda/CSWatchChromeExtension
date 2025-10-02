@@ -28,17 +28,30 @@ body {
 
 .btn {
     display: inline-block;
-    background-color: #e71c1d;
-    color: #fff;
     padding: 10px 15px;
     text-decoration: none;
     border-radius: 6px;
     font-weight: bold;
     transition: background 0.3s ease;
+    margin: 5px 3px;
 }
 
-.btn:hover {
+.btn-red {
+    background-color: #e71c1d;
+    color: #fff;
+}
+
+.btn-red:hover {
     background-color: #c01718;
+}
+
+.btn-green {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.btn-green:hover {
+    background-color: #218838;
 }
 
 .footer {
