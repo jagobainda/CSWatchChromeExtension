@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "CSWatch Stats Viewer",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Chrome and Chromium-based extension that displays CSWatch stats directly on the Steam profile",
   "icons": {
     "16": "imgs/logo16.png",

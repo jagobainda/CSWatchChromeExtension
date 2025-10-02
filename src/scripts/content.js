@@ -393,6 +393,8 @@ const setEventListeners = () => {
 }
 
 (async () => {
+    if (!/^https:\/\/steamcommunity\.com\/(id|profiles)\/[^/]+\/?$/.test(window.location.href)) return;
+
     const template = createTemplate();
 
     const profileCustomizationArea = document.querySelector('.profile_customization_area');
