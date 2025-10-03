@@ -6,7 +6,7 @@ A Chrome extension that displays CSWatch statistics directly on Steam profiles, 
 
 ### From Chrome Web Store
 
-[Install from Chrome Web Store](https://google.com)
+[Install from Chrome Web Store](https://chromewebstore.google.com/detail/cswatch-stats-viewer/nklafihgaifhoahbfcfiaemfmpoplkch)
 
 ### Manual Installation (Developers)
 
