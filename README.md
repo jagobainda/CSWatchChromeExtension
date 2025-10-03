@@ -2,6 +2,28 @@
 
 A Firefox extension that displays CSWatch statistics directly on Steam profiles, providing valuable information about CS2 players' performance.
 
+## 🛠️ Installation
+
+### From Firefox Add-ons
+
+[Install from Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/cswatch/)
+
+### Manual Installation (Developers)
+
+1. Download or clone this repository:
+
+    ```bash
+    git clone https://github.com/jagobainda/CSWatchChromeExtension.git
+    ```
+
+2. Open Firefox and go to `about:debugging#/runtime/this-firefox`
+
+3. Click "Load Temporary Add-on"
+
+4. Select the `manifest.json` file inside the project folder
+
+5. The extension will be ready to use!
+
 ## 🚀 Features
 
 -   **Seamless Integration**: Displays CSWatch statistics directly on Steam profiles
@@ -28,28 +50,6 @@ Each metric includes a color code that indicates:
 -   🟡 Yellow: Suspicious performance/medium risk
 -   🟠 Orange: Very suspicious performance/high risk
 -   🔴 Red: Extremely suspicious performance/very high risk
-
-## 🛠️ Installation
-
-### From Firefox Add-ons
-
-[Install from Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/cswatch/)
-
-### Manual Installation (Developers)
-
-1. Download or clone this repository:
-
-    ```bash
-    git clone https://github.com/jagobainda/CSWatchChromeExtension.git
-    ```
-
-2. Open Firefox and go to `about:debugging#/runtime/this-firefox`
-
-3. Click "Load Temporary Add-on"
-
-4. Select the `manifest.json` file inside the project folder
-
-5. The extension will be ready to use!
 
 ## 🎮 Usage
 
