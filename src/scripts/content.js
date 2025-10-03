@@ -1,5 +1,3 @@
-/// <reference types="chrome"/>
-
 let responseData = null;
 
 const loadUserStats = async () => {
@@ -10,7 +8,7 @@ const loadUserStats = async () => {
         return;
     }
 
-    await chrome.runtime.sendMessage(
+    await browser.runtime.sendMessage(
         { action: 'fetchPlayerData', userId },
         (response) => {
             if (!response || !response.success) {
@@ -215,7 +213,7 @@ const createTemplate = () => {
     headerTitle.className = 'profile-customization-header-title';
 
     const csWatchLogo = document.createElement('img');
-    csWatchLogo.src = chrome.runtime.getURL('imgs/logo48.png');
+    csWatchLogo.src = browser.runtime.getURL('imgs/logo48.png');
     csWatchLogo.className = 'cs-watch-logo';
     csWatchLogo.alt = 'CSWatch Logo';
 

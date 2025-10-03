@@ -1,7 +1,7 @@
 @echo off
-echo Building Chrome extension...
+echo Building Firefox extension...
 
-for /f "tokens=2 delims=:" %%a in ('findstr "version" manifest.json') do (
+for /f "tokens=2 delims=:" %%a in ('findstr "\"version\":" manifest.json') do (
     set version_line=%%a
 )
 for /f "tokens=1 delims=," %%a in ("%version_line%") do (
@@ -24,7 +24,7 @@ for /f "usebackq tokens=* delims=" %%i in (".buildignore") do (
 
 robocopy . "temp_build" /E %EXCLUDE_DIRS% %EXCLUDE_FILES%
 
-set zipName=cswatch-chrome-extension-%version%.zip
+set zipName=cswatch-firefox-addon-%version%.zip
 echo Creating: %zipName%
 
 if exist "%zipName%" (
@@ -33,7 +33,7 @@ if exist "%zipName%" (
     timeout /t 1 /nobreak >nul
 )
 
-powershell "Compress-Archive -Path 'temp_build\*' -DestinationPath '%zipName%' -Force"
+"C:\Program Files\7-Zip\7z.exe" a -tzip "%zipName%" ".\temp_build\*" -r
 
 rmdir /s /q "temp_build"
 
@@ -42,24 +42,20 @@ pause
 exit /b
 
 :processLine
-
 set "line=%line:~0,1024%"
 if "%line%"=="" exit /b
 if "%line:~0,1%"=="#" exit /b
-
 
 if "%line:~-1%"=="/" (
     set "EXCLUDE_DIRS=%EXCLUDE_DIRS% /XD %line:~0,-1%"
     exit /b
 )
 
-
 echo %line% | findstr /C:"*" >nul
 if not errorlevel 1 (
     set "EXCLUDE_FILES=%EXCLUDE_FILES% /XF %line%"
     exit /b
 )
-
 
 set "EXCLUDE_FILES=%EXCLUDE_FILES% /XF %line%"
 exit /b

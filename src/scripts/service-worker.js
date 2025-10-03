@@ -1,4 +1,4 @@
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'fetchPlayerData') {
         fetch(`https://cswatch.in/api/players/${request.userId}`)
             .then(response => response.json())
