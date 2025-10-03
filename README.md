@@ -2,6 +2,30 @@
 
 A Chrome extension that displays CSWatch statistics directly on Steam profiles, providing valuable information about CS2 players' performance.
 
+## 🛠️ Installation
+
+### From Chrome Web Store
+
+[Install from Chrome Web Store](https://google.com)
+
+### Manual Installation (Developers)
+
+1. Download or clone this repository:
+
+    ```bash
+    git clone https://github.com/jagobainda/CSWatchChromeExtension.git
+    ```
+
+2. Open Chrome and navigate to `chrome://extensions/`
+
+3. Enable "Developer mode" in the top right corner
+
+4. Click "Load unpacked"
+
+5. Select the downloaded project folder
+
+6. The extension will be ready to use!
+
 ## 🚀 Features
 
 -   **Seamless Integration**: Displays CSWatch statistics directly on Steam profiles
@@ -28,30 +52,6 @@ Each metric includes a color code that indicates:
 -   🟡 Yellow: Suspicious performance/medium risk
 -   🟠 Orange: Very suspicious performance/high risk
 -   🔴 Red: Extremely suspicious performance/very high risk
-
-## 🛠️ Installation
-
-### From Chrome Web Store
-
-[Install from Chrome Web Store](https://google.com)
-
-### Manual Installation (Developers)
-
-1. Download or clone this repository:
-
-    ```bash
-    git clone https://github.com/jagobainda/CSWatchChromeExtension.git
-    ```
-
-2. Open Chrome and navigate to `chrome://extensions/`
-
-3. Enable "Developer mode" in the top right corner
-
-4. Click "Load unpacked"
-
-5. Select the downloaded project folder
-
-6. The extension will be ready to use!
 
 ## 🎮 Usage
 
