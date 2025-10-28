@@ -8,7 +8,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             .then(response => {
                 const status = response.status;
                 if (!response.ok) return sendResponse({ success: false, status, error: `HTTP ${status}` });
-                return response.text().then(data => sendResponse({ success: true, status, data }));
+                return response.json().then(data => sendResponse({ success: true, status, data }));
             })
             .catch(error => sendResponse({ success: false, error: error.message }));
         return true;
