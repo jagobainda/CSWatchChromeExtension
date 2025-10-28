@@ -13,7 +13,17 @@ const loadUserStats = async () => {
     await chrome.runtime.sendMessage(
         { action: 'fetchPlayerData', userId },
         (response) => {
-            if (!response || !response.success) {
+            if (!response) {
+                showError('Failed to fetch player data');
+                return;
+            }
+
+            if (response.status === 403) {
+                showError('API is temporarily blocked due to DDoS attacks');
+                return;
+            }
+
+            if (!response.success) {
                 showError('Failed to fetch player data');
                 return;
             }
