@@ -19,7 +19,7 @@ const loadUserStats = async () => {
             }
 
             if (response.status === 403) {
-                showError('API is temporarily blocked due to DDoS attacks');
+                showError('CSWatch.in is migrating to CSRep.gg – Coming soon');
                 return;
             }
 
