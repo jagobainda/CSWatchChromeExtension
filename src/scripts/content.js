@@ -2,29 +2,34 @@
 
 let responseData = null;
 
-const loadUserStats = async () => {
+let faceitResponseData = null;
+
+let csStatsResponseData = null;
+
+const loadCSRepStats = async () => {
     const userId = getUserId();
 
     if (!userId) {
-        showError('User ID not found');
+        showErrorCSRep('User ID not found');
         return;
     }
 
     await chrome.runtime.sendMessage(
         { action: 'fetchPlayerData', userId },
         (response) => {
+            console.log(response)
             if (!response) {
-                showError('Failed to fetch player data');
+                showErrorCSRep('Failed to fetch player data');
                 return;
             }
 
             if (response.status === 403) {
-                showError('CSWatch.in is migrating to CSRep.gg – Coming soon');
+                showErrorCSRep('CSRep.gg – Coming soon');
                 return;
             }
 
             if (!response.success) {
-                showError('Failed to fetch player data');
+                showErrorCSRep('Failed to fetch player data');
                 return;
             }
 
@@ -36,12 +41,142 @@ const loadUserStats = async () => {
 
             if (hasFaceit) showFaceitFilter();
 
-            displayStats(response, true);
+            displayCSRepStats(response, true);
 
             responseData = response;
         }
     );
-}
+};
+
+const loadCSStatsStats = async () => {
+    const userId = getUserId();
+
+    if (!userId) {
+        showErrorCSStats('User ID not found');
+        return;
+    }
+
+    try {
+        const baseResponse = await new Promise((resolve, reject) => {
+            chrome.runtime.sendMessage(
+                { action: 'fetchCSStatsData', userId: userId },
+                (response) => {
+                    if (chrome.runtime.lastError) {
+                        reject(chrome.runtime.lastError.message);
+                    } else if (response.success) {
+                        resolve(response.data);
+                    } else {
+                        reject(response.error);
+                    }
+                }
+            );
+        });
+
+        const cs2StatsResponse = await new Promise((resolve, reject) => {
+            chrome.runtime.sendMessage(
+                { action: 'fetchCSStatsData', userId: userId, endpoint: '/stats' },
+                (response) => {
+                    if (chrome.runtime.lastError) {
+                        reject(chrome.runtime.lastError.message);
+                    } else if (response.success) {
+                        resolve(response.data);
+                    } else {
+                        reject(response.error);
+                    }
+                }
+            );
+        });
+
+        csStatsResponseData = {
+            base: baseResponse,
+            cs2Stats: cs2StatsResponse
+        };
+
+        const parsedBase = parseCSStatsBase(baseResponse);
+        const parsedCs2 = parseCSStatsCS2(cs2StatsResponse);
+
+        if (!parsedBase?.csgo) document.getElementById('csstats-csgo-button')?.classList.add('disabled');
+
+        displayCSStatsStats({ base: parsedBase, cs2: parsedCs2 });
+    } catch (error) {
+        console.error('Error fetching CSStats data:', error);
+        showErrorCSStats('Failed to fetch CSStats data');
+    }
+};
+
+const loadFaceitStats = () => {
+    return new Promise((resolve) => {
+        const userId = getUserId();
+
+        if (!userId) {
+            showErrorFaceit('User ID not found');
+            resolve();
+            return;
+        }
+
+        chrome.runtime.sendMessage(
+            { action: 'fetchFaceitData', userId },
+            (response) => {
+                if (!response) {
+                    showErrorFaceit('Failed to fetch Faceit data');
+                    resolve();
+                    return;
+                }
+
+                if (response.status === 403) {
+                    showErrorFaceit('Faceit data not found');
+                    resolve();
+                    return;
+                }
+
+                if (!response.success) {
+                    showErrorFaceit('Failed to fetch player data');
+                    resolve();
+                    return;
+                }
+
+                const isBanned = response.data.bans.items.length > 0;
+
+                if (isBanned) {
+                    const banReason = response.data.bans.items[0].reason;
+
+                    showBanned(banReason);
+                }
+
+                const hasCsgo = !!response.data.playerData?.games?.csgo;
+
+                if (!hasCsgo)document.getElementById('faceit-csgo-button')?.classList.add('disabled');
+                console.log(response)
+                displayFaceitStats(response);
+
+                faceitResponseData = response;
+
+                resolve();
+            }
+        );
+    });
+};
+
+const loadAccountStats = async () => {
+    const userId = getUserId();
+
+    if (!userId) {
+        showErrorFaceit('User ID not found');
+        return;
+    }
+
+    const steamCreationDate = await getSteamCreationDate();
+    const faceitCreationDate = formatDate(faceitResponseData.data.playerData.activated_at);
+
+    const data = {
+        idleHours: "Coming soon",
+        steamCreationDate: steamCreationDate,
+        faceitCreationDate: faceitCreationDate,
+        dateDifference: getDateDifference(steamCreationDate, faceitCreationDate) + " days"
+    }
+
+    displayAccountStats(data);
+};
 
 const getUserId = () => {
     const steamIdSpan = document.getElementById('steam-id-hidden');
@@ -49,174 +184,143 @@ const getUserId = () => {
     if (!steamIdSpan) return null;
 
     return steamIdSpan.innerText;
-}
+};
 
-const showAutoflagged = () => {
-    const container = document.getElementById('is-autoflagged');
+const getSteamCreationDate = async () => {
+    try {
+        const userId = getUserId();
+        const response = await fetch(`https://steamcommunity.com/profiles/${userId}/badges/1?l=english`);
+        const text = await response.text();
 
-    container.style.display = 'block';
-}
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(text, "text/html");
+        const dateElement = doc.querySelector('.badge_description');
 
-const showFaceitFilter = () => {
-    const container = document.getElementById('faceit-filter-button');
+        if (!dateElement) return "Unknown";
 
-    container.style.display = 'block';
-}
-
-const displayStats = (responseObject, faceitAdjustment) => {
-    if (!responseObject) {
-        showError('Failed to fetch player data');
-        return;
+        const creationText = dateElement.textContent.trim().replace("Member since ", "");
+        return formatDate(creationText);
+    } catch (error) {
+        console.error('Error fetching Steam creation date:', error);
     }
 
-    const data = responseObject.data.csWatchAnalysis.breakdown;
+    return "Unknown";
+};
 
-    if (data.length < 1) {
-        showError(responseObject.data.csWatchAnalysis.message);
-        return;
-    }
+const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
 
-    const totalScore = responseObject.data.csWatchAnalysis.totalScore
-    const unadjustedScore = responseObject.data.csWatchAnalysis.unadjustedScore
-    const version = responseObject.data.csWatchAnalysis.version
-    const faceitAdjustmentValue = responseObject.data.csWatchAnalysis.faceitAdjustment
+    return `${day}-${month}-${year}`;
+};
 
-    const kdRatio = document.getElementById('cs-watch-stats-kd-ratio');
-    const timeToDamage = document.getElementById('cs-watch-stats-time-to-damage');
-    const preaimDegree = document.getElementById('cs-watch-stats-preaim-degree');
-    const aimRating = document.getElementById('cs-watch-stats-aim-rating');
-    const winRate = document.getElementById('cs-watch-stats-win-rate');
-    const riskRate = document.getElementById('cs-watch-stats-risk-rate');
-    const analysisVersion = document.getElementById('analysis-version');
+const getDateDifference = (date1, date2) => {
+    const parseDate = (dateStr) => {
+        if (!dateStr || dateStr === "Unknown") return null;
 
-    if (!kdRatio || !timeToDamage || !preaimDegree || !aimRating || !winRate || !riskRate || !analysisVersion) {
-        showError('Failed to fetch player data');
-        return;
-    }
+        const [day, month, year] = dateStr.split('-');
 
-    const kdRatioObject = data.find(item => item.type === 'kd');
-    const timeToDamageObject = data.find(item => item.type === 'reaction');
-    const preaimDegreeObject = data.find(item => item.type === 'preaim');
-    const aimRatingObject = data.find(item => item.type === 'aim');
-    const winRateObject = data.find(item => item.type === 'winrate');
+        if (!day || !month || !year) return null;
 
-    kdRatio.innerText = kdRatioObject.value;
-    timeToDamage.innerText = timeToDamageObject.value + " ms";
-    preaimDegree.innerText = preaimDegreeObject.value + "º";
-    aimRating.innerText = aimRatingObject.value + " %";
-    winRate.innerText = winRateObject.value + " %";
-    riskRate.innerText = (faceitAdjustment ? totalScore : unadjustedScore) + " %";
-    analysisVersion.innerText = "v" + version;
+        const timestamp = new Date(`${year}-${month}-${day}`).getTime();
 
-    const metrics = {
-        kdRatio,
-        timeToDamage,
-        preaimDegree,
-        aimRating,
-        winRate
+        return isNaN(timestamp) ? null : timestamp;
     };
 
-    const scores = {
-        kdRatio: kdRatioObject,
-        timeToDamage: timeToDamageObject,
-        preaimDegree: preaimDegreeObject,
-        aimRating: aimRatingObject,
-        winRate: winRateObject
+    const date1ms = parseDate(date1);
+    const date2ms = parseDate(date2);
+
+    if (date1ms === null || date2ms === null) return "Unknown";
+
+    return Math.floor((date2ms - date1ms) / (1000 * 60 * 60 * 24));
+};
+
+const toggleSectionButton = (section, game) => {
+    const buttons = {
+        csstats: {
+            csgo: document.getElementById('csstats-csgo-button'),
+            cs2: document.getElementById('csstats-cs2-button')
+        },
+        faceit: {
+            csgo: document.getElementById('faceit-csgo-button'),
+            cs2: document.getElementById('faceit-cs2-button')
+        }
     };
 
-    const colorClasses = ["text-red-500", "text-orange-500", "text-yellow-500", "text-green-500"];
+    const sectionButtons = buttons[section];
 
-    Object.keys(metrics).forEach(key => {
-        const el = metrics[key];
-        const scoreObj = scores[key];
+    if (!sectionButtons) return;
 
-        el.classList.remove(...colorClasses);
-
-        const message = getV11MetricMessage(scoreObj.score, faceitAdjustment, faceitAdjustmentValue);
-
-        el.classList.add(message.color);
-        el.title = message.text;
+    Object.keys(sectionButtons).forEach(key => {
+        sectionButtons[key]?.classList.remove('selected');
     });
 
-    riskRate.classList.add(getV11RiskLevel(faceitAdjustment ? totalScore : unadjustedScore).color);
-    riskRate.title = getV11RiskLevel(faceitAdjustment ? totalScore : unadjustedScore).text;
-}
+    sectionButtons[game]?.classList.add('selected');
+
+    if (section === 'csstats') {
+        const csStatsContainer = document.getElementById('csstats-stats-container');
+
+        if (!csStatsContainer) return;
+
+        const statsItems = csStatsContainer.querySelectorAll('.stats-item');
+
+        statsItems.forEach(item => {
+            const itemGame = item.dataset.game;
+            if (itemGame === game) {
+                item.classList.remove('hidden');
+            } else {
+                item.classList.add('hidden');
+            }
+        });
+    }
+
+    if (section === 'faceit') {
+        if (!faceitResponseData) return;
+
+        const toggleStats = faceitResponseData.data.stats[game];
+        const toggleElo = faceitResponseData.data.playerData.games[game]?.faceit_elo;
+        const toggleLvl = faceitResponseData.data.playerData.games[game]?.skill_level;
+
+        if (!toggleStats?.lifetime) console.warn(`No hay datos de stats para ${game}`);
+
+        const lvlIcon = document.getElementById('faceit-stats-level-icon');
+        const elo = document.getElementById('faceit-stats-elo');
+        const kd = document.getElementById('faceit-stats-kd');
+        const winrate = document.getElementById('faceit-stats-winrate');
+        const hs = document.getElementById('faceit-stats-hs');
+        const matches = document.getElementById('faceit-stats-matches');
+
+        const getMatches = () => {
+            const cs2Matches = faceitResponseData.data.stats.cs2?.lifetime?.m1 ?? 0;
+            const csgoMatches = faceitResponseData.data.stats.csgo?.lifetime?.m1 ?? 0;
+
+            return game === 'cs2' ? cs2Matches - csgoMatches : csgoMatches;
+        };
+
+        if (lvlIcon && toggleLvl) lvlIcon.src = chrome.runtime.getURL(`imgs/faceit/lvl${toggleLvl}.svg`);
+        if (elo) elo.innerText = toggleElo ?? 'N/A';
+        if (kd) kd.innerText = toggleStats?.lifetime?.k5 ?? 'N/A';
+        if (winrate) winrate.innerText = `${toggleStats?.lifetime?.k6 ?? 0} %`;
+        if (hs) hs.innerText = `${toggleStats?.lifetime?.k8 ?? 0} %`;
+        if (matches) matches.innerText = getMatches().toString();
+    }
+};
 
 const switchFaceitFilter = () => {
     const faceitFilterButton = document.getElementById('faceit-filter-button');
     faceitFilterButton?.classList.toggle('filter-applied');
 
-    displayStats(responseData, faceitFilterButton?.classList.contains('filter-applied'));
+    displayCSRepStats(responseData, faceitFilterButton?.classList.contains('filter-applied'));
 };
 
-const createColorScheme = (baseColor) => ({
-    color: `text-${baseColor}-500`,
-    bgColor: `bg-${baseColor}-500/20`,
-    borderColor: `border-${baseColor}-500`
-});
-
-const getV11RiskLevel = (score, applyFaceit, faceitAdjustmentValue) => {
-    score = Math.min(score, 100);
-    if (applyFaceit) score += faceitAdjustmentValue;
-    if (score >= 98) return { text: "Extremely High Risk", ...createColorScheme("red") };
-    if (score >= 90) return { text: "Very High Risk", ...createColorScheme("red") };
-    if (score >= 75) return { text: "High Risk", ...createColorScheme("orange") };
-    if (score >= 50) return { text: "Medium Risk", ...createColorScheme("orange") };
-    if (score >= 25) return { text: "Low Risk", ...createColorScheme("yellow") };
-    return { text: "Very Low Risk", ...createColorScheme("green") };
-};
-
-const getV11MetricMessage = (score, applyFaceit, faceitAdjustmentValue) => {
-    score = Math.min(score, 100);
-    if (applyFaceit) score += faceitAdjustmentValue;
-    if (score >= 100) return { text: "Extremely Suspicious", color: "text-red-500" };
-    if (score >= 80) return { text: "Highly Suspicious", color: "text-red-500" };
-    if (score >= 60) return { text: "Suspicious", color: "text-orange-500" };
-    if (score >= 50) return { text: "Little Suspicious", color: "text-yellow-500" };
-    return { text: "Normal", color: "text-green-500" };
-};
-
-const showError = (message) => {
-    const container = document.getElementById('cs-watch-stats-container');
-
-    if (!container) return;
-
-    const error = document.createElement('p');
-
-    error.innerText = message;
-
-    container.innerHTML = '';
-    container.appendChild(error);
-}
-
-const copyStatsToClipboard = async () => {
-    const kdRatio = document.getElementById('cs-watch-stats-kd-ratio');
-    const timeToDamage = document.getElementById('cs-watch-stats-time-to-damage');
-    const preaimDegree = document.getElementById('cs-watch-stats-preaim-degree');
-    const aimRating = document.getElementById('cs-watch-stats-aim-rating');
-    const winRate = document.getElementById('cs-watch-stats-win-rate');
-    const riskRate = document.getElementById('cs-watch-stats-risk-rate');
-
-    const userNickname = document.querySelector('.actual_persona_name');
-
-    if (!kdRatio || !timeToDamage || !preaimDegree || !aimRating || !winRate || !riskRate) return
-
-    const stats = `Nickname: ${userNickname.innerText} | K/D: ${kdRatio.innerText} | TTD: ${timeToDamage.innerText} | Preaim: ${preaimDegree.innerText} | Aim Rating: ${aimRating.innerText} | Win rate: ${winRate.innerText} | Risk rate: ${riskRate.innerText}`;
-
-    await navigator.clipboard.writeText(stats);
-}
-
-const createTemplate = () => {
-    const container = document.createElement('div');
-    container.id = 'cs-watch-container';
-
+const createSectionStructure = () => {
     const profileCustomization = document.createElement('div');
     profileCustomization.className = 'profile_customization';
 
     const header = document.createElement('div');
     header.className = 'profile_customization_header';
-    header.style.padding = '5px';
-    header.style.setProperty('padding', '5px', 'important');
 
     const headerContent = document.createElement('div');
     headerContent.className = 'profile-customization-header-content';
@@ -224,197 +328,110 @@ const createTemplate = () => {
     const headerTitle = document.createElement('div');
     headerTitle.className = 'profile-customization-header-title';
 
-    const csWatchLogo = document.createElement('img');
-    csWatchLogo.src = chrome.runtime.getURL('imgs/logo48.png');
-    csWatchLogo.className = 'cs-watch-logo';
-    csWatchLogo.alt = 'CSWatch Logo';
-
-    const csWatchLinkTitle = document.createElement('a');
-    csWatchLinkTitle.target = '_blank';
-    csWatchLinkTitle.innerText = 'CSWATCH.IN';
-    csWatchLinkTitle.className = 'cs-watch-link-title';
-    csWatchLinkTitle.id = 'cs-watch-link-title';
-
     const headerComplementsContainer = document.createElement('div');
     headerComplementsContainer.className = 'profile-customization-header-title';
-
-    const isAutoflagged = document.createElement('div');
-    isAutoflagged.innerText = 'Autoflagged';
-    isAutoflagged.className = 'is-autoflagged';
-    isAutoflagged.id = 'is-autoflagged';
-
-    const analysisVersion = document.createElement('span');
-    analysisVersion.className = 'analysis-version';
-    analysisVersion.id = 'analysis-version';
-    analysisVersion.innerText = 'v0.0';
-    analysisVersion.title = 'CSWatch Analysis Version';
-
-    const copyToClipboard = document.createElement('div');
-    copyToClipboard.innerText = 'Copy stats to clipboard';
-    copyToClipboard.className = 'copy-cs-watch-stats-to-clipboard';
-    copyToClipboard.id = 'copy-cs-watch-stats-to-clipboard';
 
     const favoriteGroup = document.createElement('div');
     favoriteGroup.className = 'favoritegroup_showcase';
 
     const favoriteGroupContent = document.createElement('div');
-    favoriteGroupContent.className = 'showcase_content_bg cs-watch-stats-container';
-    favoriteGroupContent.id = 'cs-watch-stats-container';
-
-    const kdRatioContainer = document.createElement('div');
-    kdRatioContainer.className = 'cs-watch-stats-item';
-
-    const kdRatio = document.createElement('span');
-    kdRatio.innerText = '0.00';
-    kdRatio.id = 'cs-watch-stats-kd-ratio';
-    kdRatio.className = 'cs-watch-stats-item-value';
-
-    const kdRatioLabel = document.createElement('div');
-    kdRatioLabel.innerText = 'K/D Ratio';
-    kdRatioLabel.className = 'cs-watch-stats-item-label';
-
-    const timeToDamageContainer = document.createElement('div');
-    timeToDamageContainer.className = 'cs-watch-stats-item';
-
-    const timeToDamage = document.createElement('span');
-    timeToDamage.innerText = '000.0 ms';
-    timeToDamage.id = 'cs-watch-stats-time-to-damage';
-    timeToDamage.className = 'cs-watch-stats-item-value';
-
-    const timeToDamageLabel = document.createElement('div');
-    timeToDamageLabel.innerText = 'T to damage';
-    timeToDamageLabel.className = 'cs-watch-stats-item-label';
-
-    const preaimDegreeContainer = document.createElement('div');
-    preaimDegreeContainer.className = 'cs-watch-stats-item';
-
-    const preaimDegree = document.createElement('span');
-    preaimDegree.innerText = '0.0º';
-    preaimDegree.id = 'cs-watch-stats-preaim-degree';
-    preaimDegree.className = 'cs-watch-stats-item-value';
-
-    const preaimDegreeLabel = document.createElement('div');
-    preaimDegreeLabel.innerText = 'Preaim Degree';
-    preaimDegreeLabel.className = 'cs-watch-stats-item-label';
-
-    const aimRatingContainer = document.createElement('div');
-    aimRatingContainer.className = 'cs-watch-stats-item';
-
-    const aimRating = document.createElement('span');
-    aimRating.innerText = '000.0 %';
-    aimRating.id = 'cs-watch-stats-aim-rating';
-    aimRating.className = 'cs-watch-stats-item-value';
-
-    const aimRatingLabel = document.createElement('div');
-    aimRatingLabel.innerText = 'Aim Rating';
-    aimRatingLabel.className = 'cs-watch-stats-item-label';
-
-    const winRateContainer = document.createElement('div');
-    winRateContainer.className = 'cs-watch-stats-item';
-
-    const winRate = document.createElement('span');
-    winRate.innerText = '000.0 %';
-    winRate.id = 'cs-watch-stats-win-rate';
-    winRate.className = 'cs-watch-stats-item-value';
-
-    const winRateLabel = document.createElement('div');
-    winRateLabel.innerText = 'Win rate';
-    winRateLabel.className = 'cs-watch-stats-item-label';
-
-    const riskRateContainer = document.createElement('div');
-    riskRateContainer.className = 'cs-watch-stats-item';
-
-    const riskRate = document.createElement('span');
-    riskRate.innerText = '0 %';
-    riskRate.id = 'cs-watch-stats-risk-rate';
-    riskRate.className = 'cs-watch-stats-item-value';
-
-    const riskRateLabel = document.createElement('div');
-    riskRateLabel.innerText = 'Risk rate';
-    riskRateLabel.className = 'cs-watch-stats-item-label';
-
-    const faceitFilterButton = document.createElement('button');
-    faceitFilterButton.innerText = 'FACEIT';
-    faceitFilterButton.className = 'faceit-filter-button filter-applied';
-    faceitFilterButton.id = 'faceit-filter-button';
-
-    profileCustomization.appendChild(header);
+    favoriteGroupContent.className = 'showcase_content_bg stats-container';
 
     header.appendChild(headerContent);
     headerContent.appendChild(headerTitle);
-    headerTitle.appendChild(csWatchLogo);
-    headerTitle.appendChild(csWatchLinkTitle);
-    headerTitle.appendChild(isAutoflagged);
     headerContent.appendChild(headerComplementsContainer);
-    headerComplementsContainer.appendChild(analysisVersion);
-    headerComplementsContainer.appendChild(copyToClipboard);
-
+    favoriteGroup.appendChild(favoriteGroupContent);
+    profileCustomization.appendChild(header);
     profileCustomization.appendChild(favoriteGroup);
 
-    favoriteGroup.appendChild(favoriteGroupContent);
+    return {
+        profileCustomization,
+        headerTitle,
+        headerComplementsContainer,
+        favoriteGroupContent
+    };
+};
 
-    favoriteGroupContent.appendChild(kdRatioContainer);
+const createTemplate = () => {
+    const mainContainer = document.createElement('div');
+    mainContainer.id = 'cs-rep-main-container';
 
-    kdRatioContainer.appendChild(kdRatio);
-    kdRatioContainer.appendChild(kdRatioLabel);
+    const csRepSection = createCSRepSection();
 
-    favoriteGroupContent.appendChild(timeToDamageContainer);
+    const csStatsSection = createCSStatsSection();
 
-    timeToDamageContainer.appendChild(timeToDamage);
-    timeToDamageContainer.appendChild(timeToDamageLabel);
+    const faceitSection = createFaceitSection();
 
-    favoriteGroupContent.appendChild(preaimDegreeContainer);
+    const accountStatsSeccion = createAccountStatsSection();
 
-    preaimDegreeContainer.appendChild(preaimDegree);
-    preaimDegreeContainer.appendChild(preaimDegreeLabel);
+    mainContainer.appendChild(csRepSection);
+    mainContainer.appendChild(csStatsSection);
+    mainContainer.appendChild(faceitSection);
+    mainContainer.appendChild(accountStatsSeccion);
 
-    favoriteGroupContent.appendChild(aimRatingContainer);
-
-    aimRatingContainer.appendChild(aimRating);
-    aimRatingContainer.appendChild(aimRatingLabel);
-
-    favoriteGroupContent.appendChild(winRateContainer);
-
-    winRateContainer.appendChild(winRate);
-    winRateContainer.appendChild(winRateLabel);
-
-    favoriteGroupContent.appendChild(riskRateContainer);
-
-    riskRateContainer.appendChild(riskRate);
-    riskRateContainer.appendChild(riskRateLabel);
-
-    favoriteGroupContent.appendChild(faceitFilterButton);
-
-    container.appendChild(profileCustomization);
-
-    return container;
-}
+    return mainContainer;
+};
 
 const setEventListeners = () => {
-    const copyToClipboardDiv = document.getElementById('copy-cs-watch-stats-to-clipboard');
-    copyToClipboardDiv?.addEventListener('click', () => copyStatsToClipboard());
+    const copyCSRepToClipboardDiv = document.getElementById('copy-cs-rep-stats-to-clipboard');
+    copyCSRepToClipboardDiv?.addEventListener('click', () => copyCSRepStatsToClipboard());
 
-    const csWatchLinkTitle = document.getElementById('cs-watch-link-title');
+    const copyCSStatsToClipboardDiv = document.getElementById('copy-csstats-stats-to-clipboard');
+    copyCSStatsToClipboardDiv?.addEventListener('click', () => copyCSStatsStatsToClipboard());
+
+    const copyFaceitToClipboardDiv = document.getElementById('copy-faceit-stats-to-clipboard');
+    copyFaceitToClipboardDiv?.addEventListener('click', () => copyFaceitStatsToClipboard());
+
     const userId = getUserId();
-    csWatchLinkTitle?.addEventListener('click', () => window.open(`https://cswatch.in/player/${userId}`, '_blank'));
+
+    const csRepLinkTitle = document.getElementById('cs-rep-link-title');
+    csRepLinkTitle?.addEventListener('click', () => window.open(`https://csrep.gg/player/${userId}`, '_blank'));
+
+    const csStatsLinkTitle = document.getElementById('cs-stats-link-title');
+    csStatsLinkTitle?.addEventListener('click', () => window.open(`https://csstats.gg/player/${userId}`, '_blank'));
+
+    const faceitLinkTitle = document.getElementById('faceit-link-title');
+    faceitLinkTitle?.addEventListener('click', () => window.open(`https://www.faceit.com/es/players/${faceitResponseData.data.playerData.nickname}`, '_blank'));
 
     const faceitFilterButton = document.getElementById('faceit-filter-button');
     faceitFilterButton?.addEventListener('click', () => switchFaceitFilter());
-}
+
+    const csstatsCsgoButton = document.getElementById('csstats-csgo-button');
+    csstatsCsgoButton?.addEventListener('click', () => toggleSectionButton("csstats", "csgo"));
+
+    const csstatsCs2Button = document.getElementById('csstats-cs2-button');
+    csstatsCs2Button?.addEventListener('click', () => toggleSectionButton("csstats", "cs2"));
+
+    const faceitCsgoButton = document.getElementById('faceit-csgo-button');
+    faceitCsgoButton?.addEventListener('click', () => toggleSectionButton("faceit", "csgo"));
+
+    const faceitCs2Button = document.getElementById('faceit-cs2-button');
+    faceitCs2Button?.addEventListener('click', () => toggleSectionButton("faceit", "cs2"));
+};
 
 (async () => {
     if (!/^https:\/\/steamcommunity\.com\/(id|profiles)\/[^/]+\/?$/.test(window.location.href)) return;
 
-    const template = createTemplate();
+    setTimeout(async () => {
+        const template = createTemplate();
 
-    const profileCustomizationArea = document.querySelector('.profile_customization_area');
-    const profileLeftcol = document.querySelector('.profile_leftcol');
+        const profileCustomizationArea = document.querySelector('.profile_customization_area');
+        const profileLeftcol = document.querySelector('.profile_leftcol');
 
-    setTimeout(() => {
         if (profileCustomizationArea) profileCustomizationArea.insertBefore(template, profileCustomizationArea.firstChild);
         if (!profileCustomizationArea && profileLeftcol) profileLeftcol.insertBefore(template, profileLeftcol.firstChild);
 
+        toggleSectionButton("csstats", "cs2");
+        toggleSectionButton("faceit", "cs2");
+
         setEventListeners();
-        loadUserStats();
+
+        await Promise.all([
+            loadCSRepStats(),
+            loadFaceitStats(),
+            loadCSStatsStats()
+        ]);
+
+        await loadAccountStats();
     }, 50);
 })();

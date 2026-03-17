@@ -1,6 +1,6 @@
-# CSWatch Stats Viewer - Chrome Extension
+# Counter-Strike Stats Viewer - Chrome Extension
 
-A Chrome extension that displays CSWatch statistics directly on Steam profiles, providing valuable information about CS2 players' performance.
+A Chrome extension that displays Counter-Strike statistics directly on Steam profiles, providing valuable information about players' performance from multiple sources.
 
 ## 🛠️ Installation
 
@@ -13,7 +13,7 @@ A Chrome extension that displays CSWatch statistics directly on Steam profiles, 
 1. Download or clone this repository:
 
     ```bash
-    git clone https://github.com/jagobainda/CSWatchChromeExtension.git
+    git clone https://github.com/jagobainda/CounterStrikeChromeExtension.git
     ```
 
 2. Open Chrome and navigate to `chrome://extensions/`
@@ -28,12 +28,12 @@ A Chrome extension that displays CSWatch statistics directly on Steam profiles, 
 
 ## 🚀 Features
 
--   **Seamless Integration**: Displays CSWatch statistics directly on Steam profiles
+-   **Seamless Integration**: Displays CSRep statistics directly on Steam profiles
 -   **Complete Information**: Visualizes key metrics like K/D ratio, reaction time, preaim, aim rating and more
 -   **Risk Indicator**: Color-coded system that indicates player risk level
 -   **Quick Copy**: Function to copy all statistics to clipboard
 -   **Autoflag Detection**: Indicates if a player has been automatically flagged
--   **Direct Link**: Quick access to the complete profile on CSWatch
+-   **Direct Link**: Quick access to the complete profile on CSRep
 
 ## 📊 Displayed Metrics
 
@@ -57,13 +57,7 @@ Each metric includes a color code that indicates:
 
 1. Navigate to any Steam profile (`steamcommunity.com/id/*` or `steamcommunity.com/profiles/*`)
 
-2. The extension will automatically detect the profile and display CSWatch statistics if available
-
-3. Statistics will appear as a new section in the profile with the CSWatch logo
-
-4. Click "Copy stats to clipboard" to copy all statistics
-
-5. Click "CSWATCH.IN" to open the complete profile on CSWatch
+2. The extension will automatically detect the profile and display Counter-Strike statistics if available
 
 ## 🔧 Development
 
@@ -71,36 +65,49 @@ Each metric includes a color code that indicates:
 
 ```
 CSWatchChromeExtension/
-├── manifest.json          # Extension configuration
+├── manifest.json               # Extension configuration (Manifest V3)
 ├── src/
-│   ├── popup.html         # Popup interface
-│   ├── scripts/
-│   │   ├── content.js     # Main content script
-│   │   ├── background.js  # Script to get Steam ID
-│   │   ├── service-worker.js # Service worker for API calls
-│   │   └── popup.js       # Popup logic
+│   ├── popup.html              # Popup interface
+│   └── scripts/
+│       ├── background.js       # Injects Steam ID into the page
+│       ├── content.js          # Main content script (orchestrates all loaders)
+│       ├── service-worker.js   # Handles external API/fetch requests
+│       ├── sections/
+│       │   ├── account-section.js   # Account section UI builder
+│       │   ├── csrep-section.js     # CSRep section UI builder
+│       │   ├── csstats-section.js   # CSStats section UI builder
+│       │   └── faceit-section.js    # Faceit section UI builder
+│       ├── parsers/
+│       │   ├── csrep-parser.js      # CSRep response parser
+│       │   └── csstats-parser.js    # CSStats HTML parser
+│       ├── info-display/
+│       │   ├── account-display.js   # Renders account info
+│       │   ├── csrep-display.js     # Renders CSRep stats
+│       │   ├── csstats-display.js   # Renders CSStats stats
+│       │   └── faceit-display.js    # Renders Faceit stats
+│       └── utils/
+│           ├── clipboard-handler.js        # Copy-to-clipboard logic
+│           ├── conditional-items-handler.js # Show/hide conditional UI elements
+│           └── error-handler.js            # Error display helpers
 │   └── styles/
-│       ├── content.css    # Content styles
-│       ├── custom-classes.css # Custom classes
-│       └── popup.css      # Popup styles
-├── imgs/                  # Extension icons
-└── build.bat             # Build script
+│       ├── content.css         # Content script styles
+│       ├── custom-classes.css  # Utility/custom classes
+│       └── popup.css           # Popup styles
+├── imgs/                       # Extension icons and rank images
+│   ├── csgo/                   # CS:GO rank images
+│   ├── faceit/                 # Faceit level SVGs
+│   ├── premiere/               # CS2 Premier rank backgrounds
+│   ├── logos/                  # Source logos (CSRep, CSStats, Faceit)
+│   └── icons/                  # CS2 / CS:GO game icons
+└── build.bat                   # Build script
 ```
 
 ### Technologies Used
 
--   **Manifest V3**: Latest version of Chrome extension system
+-   **Manifest V3**: Latest version of the Chrome extension system
 -   **Vanilla JavaScript**: No external dependencies
 -   **CSS3**: Modern styles with Steam integration
 -   **Chrome Extension APIs**: For complete browser integration
-
-### CSWatch API
-
-The extension uses CSWatch's public API:
-
--   Endpoint: `https://cswatch.in/api/players/{steamId}`
--   No authentication required
--   Returns data in JSON format
 
 ## 🤝 Contributing
 
@@ -116,8 +123,9 @@ Contributions are welcome. To contribute:
 
 The extension requires the following permissions:
 
--   `*://steamcommunity.com/*`: To function on Steam Community
--   `*://cswatch.in/api/*`: To get data from CSWatch API
+-   `*://steamcommunity.com/*`: To function on Steam Community pages
+-   `*://shapi.jagoba.dev/*`: Proxy API for CSRep and Faceit data
+-   `*://csstats.gg/*`: To scrape data from CSStats.gg
 
 ## ⚖️ License
 
@@ -127,12 +135,12 @@ This project is under the MIT license. See the [LICENSE](LICENSE) file for more 
 
 If you encounter any issues or have suggestions:
 
--   You can report bugs or suggest improvements to the developer [jagobainda](https://github.com/jagobainda)
--   You can also join the [official CSWatch Discord](https://discord.gg/EDwBUzU95p)
+-   Report bugs or suggest improvements via [GitHub Issues](https://github.com/jagobainda/CSWatchChromeExtension/issues)
+-   Contact the developer: [jagobainda](https://github.com/jagobainda)
 
 ## ⚠️ Disclaimer
 
-This extension is not officially affiliated with Steam or Valve Corporation. It is an independent project created by the community to improve the user experience.
+This extension is not officially affiliated with Steam, Valve Corporation, Faceit, CSRep or CSStats.gg. It is an independent community project created to improve the user experience.
 
 ---
 

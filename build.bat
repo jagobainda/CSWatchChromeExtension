@@ -24,7 +24,7 @@ for /f "usebackq tokens=* delims=" %%i in (".buildignore") do (
 
 robocopy . "temp_build" /E %EXCLUDE_DIRS% %EXCLUDE_FILES%
 
-set zipName=cswatch-chrome-extension-%version%.zip
+set zipName=csrep-chrome-extension-%version%.zip
 echo Creating: %zipName%
 
 if exist "%zipName%" (

@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "CSWatch Stats Viewer",
-  "version": "1.1.4",
-  "description": "Chrome and Chromium-based extension that displays CSWatch stats directly on the Steam profile",
+  "name": "Counter-Strike Stats Viewer",
+  "version": "2.0.0",
+  "description": "Extension that displays Counter-Strike stats directly on the Steam profile",
   "icons": {
     "16": "imgs/logo16.png",
     "48": "imgs/logo48.png",
@@ -34,6 +34,19 @@
         "*://steamcommunity.com/profiles/*"
       ],
       "js": [
+        "src/scripts/sections/csrep-section.js",
+        "src/scripts/sections/csstats-section.js",
+        "src/scripts/sections/faceit-section.js",
+        "src/scripts/sections/account-section.js",
+        "src/scripts/parsers/csstats-parser.js",
+        "src/scripts/parsers/csrep-parser.js",
+        "src/scripts/utils/clipboard-handler.js",
+        "src/scripts/utils/error-handler.js",
+        "src/scripts/utils/conditional-items-handler.js",
+        "src/scripts/info-display/csrep-display.js",
+        "src/scripts/info-display/csstats-display.js",
+        "src/scripts/info-display/faceit-display.js",
+        "src/scripts/info-display/account-display.js",
         "src/scripts/content.js"
       ],
       "css": [
@@ -44,14 +57,18 @@
   ],
   "host_permissions": [
     "*://steamcommunity.com/*",
-    "*://shapi.jagoba.dev/*"
+    "*://shapi.jagoba.dev/*",
+    "*://csstats.gg/*"
   ],
   "web_accessible_resources": [
     {
       "resources": [
-        "imgs/*.png"
+        "imgs/*.png",
+        "imgs/**/*.svg"
       ],
-      "matches": ["*://steamcommunity.com/*"]
+      "matches": [
+        "*://steamcommunity.com/*"
+      ]
     }
   ],
   "background": {

@@ -13,3 +13,51 @@
 .text-green-500 {
     color: #22c55e;
 }
+
+.text-faceit-orange {
+    color: #fe6d0c;
+}
+
+.text-csstats-blue {
+    color: #3873fc;
+}
+
+.premiere-30plus {
+    color: #FED700;
+}
+
+.premiere-25_30 {
+    color: #EB4B4B;
+}
+
+.premiere-20_25 {
+    color: #D22CE6;
+}
+
+.premiere-15_20 {
+    color: #8846FF;
+}
+
+.premiere-10_15 {
+    color: #4B69FF;
+}
+
+.premiere-5_10 {
+    color: #5E98D7;
+}
+
+.premiere-0_5 {
+    color: #B1C3D9;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.cs-typography {
+    font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+    font-weight: 700;
+    font-stretch: condensed;
+    letter-spacing: -0.02em;
+    font-size: 1.4em;
+}

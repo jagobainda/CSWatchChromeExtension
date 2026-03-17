@@ -10,12 +10,40 @@
     gap: 10px;
 }
 
-.cs-watch-logo {
+.cs-rep-logo {
     width: 30px;
     height: 30px;
 }
 
-.cs-watch-link-title {
+.faceit-user-nickname {
+    color: white;
+    background: #16161670;
+    font-size: 12px;
+    padding: 0 13px;
+    border-radius: 6px;
+    font-weight: 500;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo-container {
+    width: 30px;
+    height: 30px;
+    background: #181818;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+}
+
+.logo-container img {
+    width: 18px;
+    height: 18px;
+}
+
+.link-title {
     display: flex;
     flex-direction: row;
     gap: 5px;
@@ -34,7 +62,7 @@
     display: none;
 }
 
-.copy-cs-watch-stats-to-clipboard {
+.header-button {
     color: #ababab;
     background: #16161670;
     font-size: 12px;
@@ -42,38 +70,69 @@
     padding: 0 13px;
     border-radius: 6px;
     font-weight: 500;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-.copy-cs-watch-stats-to-clipboard:hover {
+.header-button:hover {
     color: #fff;
     background: #161616;
     cursor: pointer;
 }
 
-.cs-watch-stats-container {
+.header-button.selected {
+    background-color: rgba(103, 193, 245, 0.2);
+    border-color: #67c1f5;
+}
+
+.header-button.selected:hover {
+    background-color: rgba(103, 193, 245, 0.3);
+}
+
+.header-button.disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.stats-container {
     padding: 15px !important;
     height: auto;
     display: flex;
     flex-direction: row;
     justify-content: center;
-    gap: 20px;
+    gap: 22px;
 }
 
-.cs-watch-stats-item {
+.stats-item {
     display: flex;
     flex-direction: column;
     align-items: center;
+    max-height: 39px !important;
 }
 
-.cs-watch-stats-item-value {
+.stats-item-value {
     font-size: 16px;
     color: #fff;
 }
 
-.cs-watch-stats-item-label {
+.stats-item-label {
     font-size: 11px;
     color: #afafaf;
     text-transform: uppercase;
+}
+
+.premiere-rank-badge {
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    padding: 0;
+    min-width: 75px;
+    height: 25px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .faceit-filter-button {
@@ -87,6 +146,7 @@
     padding: 4px 12px;
     transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
     display: none;
+    cursor: pointer;
 }
 
 .faceit-filter-button:hover {
