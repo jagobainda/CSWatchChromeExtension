@@ -177,3 +177,40 @@
     padding: .25rem .5rem;
     font-weight: 400;
 }
+
+.game-toggle-icon {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+}
+
+.faceit-level-container {
+    position: relative;
+}
+
+.faceit-level-icon {
+    height: 35px;
+    width: auto;
+}
+
+.faceit-elo-label {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+}
+
+.faceit_country {
+    width: 20px;
+    height: auto;
+}
+
+.premiere-rank-padding {
+    padding: 0 0 2px 6px;
+}
+
+.elo-decimal {
+    font-size: 0.7em;
+}
+

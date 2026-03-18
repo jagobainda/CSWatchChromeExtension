@@ -6,32 +6,8 @@ const displayCSStatsStats = (responseObject) => {
 
     const { base, cs2 } = responseObject;
 
-    const getPremierRankBackground = (rank) => {
-        if (!rank) return '';
-
-        const rankNum = parseInt(rank);
-        switch (true) {
-            case (rankNum >= 0 && rankNum <= 4):
-                return '0_5';
-            case (rankNum >= 5 && rankNum <= 9):
-                return '5_10';
-            case (rankNum >= 10 && rankNum <= 14):
-                return '10_15';
-            case (rankNum >= 15 && rankNum <= 19):
-                return '15_20';
-            case (rankNum >= 20 && rankNum <= 24):
-                return '20_25';
-            case (rankNum >= 25 && rankNum <= 29):
-                return '25_30';
-            case (rankNum >= 30):
-                return '30plus';
-            default:
-                return '';
-        }
-    };
-
-    const premierLastRankBgString = getPremierRankBackground(base.cs2.last_rank?.main);
-    const premierBestRankBgString = getPremierRankBackground(base.cs2.best_rank?.main);
+    const premierLastRankBgString = CONSTANTS.getPremierRankBackground(base.cs2.last_rank?.main);
+    const premierBestRankBgString = CONSTANTS.getPremierRankBackground(base.cs2.best_rank?.main);
 
     const premierLastRankBg = document.getElementById('csstats-stats-premiere-current-elo');
     const premierBestRankBg = document.getElementById('csstats-stats-premiere-best-elo');
@@ -47,7 +23,7 @@ const displayCSStatsStats = (responseObject) => {
 
     const formatEloWithDecimal = (main, decimal) => {
         if (!main) return '---';
-        return `${main}<span style="font-size: 0.7em;">,${decimal || '0'}</span>`;
+        return `${main}<span class="elo-decimal">,${decimal || '0'}</span>`;
     };
 
     const premierCurrentEl = document.getElementById('csstats-stats-premiere-current-elo');

@@ -23,7 +23,7 @@
         "*://steamcommunity.com/profiles/*"
       ],
       "js": [
-        "src/scripts/background.js"
+        "src/scripts/steam-context.js"
       ],
       "world": "MAIN",
       "run_at": "document_end"
@@ -34,6 +34,7 @@
         "*://steamcommunity.com/profiles/*"
       ],
       "js": [
+        "src/scripts/utils/constants.js",
         "src/scripts/sections/csrep-section.js",
         "src/scripts/sections/csstats-section.js",
         "src/scripts/sections/faceit-section.js",

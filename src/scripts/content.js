@@ -1,51 +1,23 @@
 /// <reference types="chrome"/>
 
-let responseData = null;
+const loadCSRepStats = () => {
+    return new Promise((resolve) => {
+        const userId = getUserId();
 
-let faceitResponseData = null;
-
-let csStatsResponseData = null;
-
-const loadCSRepStats = async () => {
-    const userId = getUserId();
-
-    if (!userId) {
-        showErrorCSRep('User ID not found');
-        return;
-    }
-
-    await chrome.runtime.sendMessage(
-        { action: 'fetchPlayerData', userId },
-        (response) => {
-            console.log(response)
-            if (!response) {
-                showErrorCSRep('Failed to fetch player data');
-                return;
-            }
-
-            if (response.status === 403) {
-                showErrorCSRep('CSRep.gg – Coming soon');
-                return;
-            }
-
-            if (!response.success) {
-                showErrorCSRep('Failed to fetch player data');
-                return;
-            }
-
-            const isAutoflagged = response.data.player.autoflagger.length > 0;
-
-            if (isAutoflagged) showAutoflagged();
-
-            const hasFaceit = response.data.player.faceitInfo.player_id !== undefined;
-
-            if (hasFaceit) showFaceitFilter();
-
-            displayCSRepStats(response, true);
-
-            responseData = response;
+        if (!userId) {
+            showErrorCSRep('CSRep.gg – Coming soon');
+            resolve();
+            return;
         }
-    );
+
+        chrome.runtime.sendMessage(
+            { action: 'fetchPlayerData', userId },
+            () => {
+                showErrorCSRep('CSRep.gg – Coming soon');
+                resolve();
+            }
+        );
+    });
 };
 
 const loadCSStatsStats = async () => {
@@ -87,7 +59,7 @@ const loadCSStatsStats = async () => {
             );
         });
 
-        csStatsResponseData = {
+        CONSTANTS.state.csStatsResponseData = {
             base: baseResponse,
             cs2Stats: cs2StatsResponse
         };
@@ -135,21 +107,20 @@ const loadFaceitStats = () => {
                     return;
                 }
 
-                const isBanned = response.data.bans.items.length > 0;
+                const isBanned = response.data.bans?.items?.length > 0;
 
                 if (isBanned) {
                     const banReason = response.data.bans.items[0].reason;
-
                     showBanned(banReason);
                 }
 
                 const hasCsgo = !!response.data.playerData?.games?.csgo;
 
-                if (!hasCsgo)document.getElementById('faceit-csgo-button')?.classList.add('disabled');
-                console.log(response)
+                if (!hasCsgo) document.getElementById('faceit-csgo-button')?.classList.add('disabled');
+
                 displayFaceitStats(response);
 
-                faceitResponseData = response;
+                CONSTANTS.state.faceitResponseData = response;
 
                 resolve();
             }
@@ -166,14 +137,20 @@ const loadAccountStats = async () => {
     }
 
     const steamCreationDate = await getSteamCreationDate();
-    const faceitCreationDate = formatDate(faceitResponseData.data.playerData.activated_at);
+
+    const faceitData = CONSTANTS.state.faceitResponseData;
+    const faceitCreationDate = faceitData?.data?.playerData?.activated_at
+        ? formatDate(faceitData.data.playerData.activated_at)
+        : 'Unknown';
 
     const data = {
         idleHours: "Coming soon",
         steamCreationDate: steamCreationDate,
         faceitCreationDate: faceitCreationDate,
-        dateDifference: getDateDifference(steamCreationDate, faceitCreationDate) + " days"
-    }
+        dateDifference: faceitCreationDate !== 'Unknown'
+            ? getDateDifference(steamCreationDate, faceitCreationDate) + " days"
+            : 'Unknown'
+    };
 
     displayAccountStats(data);
 };
@@ -198,6 +175,7 @@ const getSteamCreationDate = async () => {
 
         if (!dateElement) return "Unknown";
 
+
         const creationText = dateElement.textContent.trim().replace("Member since ", "");
         return formatDate(creationText);
     } catch (error) {
@@ -209,6 +187,7 @@ const getSteamCreationDate = async () => {
 
 const formatDate = (dateString) => {
     const date = new Date(dateString);
+    if (isNaN(date.getTime())) return "Unknown";
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = date.getFullYear();
@@ -240,12 +219,12 @@ const getDateDifference = (date1, date2) => {
 const toggleSectionButton = (section, game) => {
     const buttons = {
         csstats: {
-            csgo: document.getElementById('csstats-csgo-button'),
-            cs2: document.getElementById('csstats-cs2-button')
+            [CONSTANTS.GAMES.CSGO]: document.getElementById('csstats-csgo-button'),
+            [CONSTANTS.GAMES.CS2]: document.getElementById('csstats-cs2-button')
         },
         faceit: {
-            csgo: document.getElementById('faceit-csgo-button'),
-            cs2: document.getElementById('faceit-cs2-button')
+            [CONSTANTS.GAMES.CSGO]: document.getElementById('faceit-csgo-button'),
+            [CONSTANTS.GAMES.CS2]: document.getElementById('faceit-cs2-button')
         }
     };
 
@@ -260,7 +239,7 @@ const toggleSectionButton = (section, game) => {
     sectionButtons[game]?.classList.add('selected');
 
     if (section === 'csstats') {
-        const csStatsContainer = document.getElementById('csstats-stats-container');
+        const csStatsContainer = document.getElementById(CONSTANTS.CONTAINER_IDS.CSSTATS);
 
         if (!csStatsContainer) return;
 
@@ -277,11 +256,14 @@ const toggleSectionButton = (section, game) => {
     }
 
     if (section === 'faceit') {
-        if (!faceitResponseData) return;
+        const faceitData = CONSTANTS.state.faceitResponseData;
+        if (!faceitData) return;
 
-        const toggleStats = faceitResponseData.data.stats[game];
-        const toggleElo = faceitResponseData.data.playerData.games[game]?.faceit_elo;
-        const toggleLvl = faceitResponseData.data.playerData.games[game]?.skill_level;
+        const { KD, WINRATE, HS, MATCHES } = CONSTANTS.FACEIT_KEYS;
+
+        const toggleStats = faceitData.data.stats[game];
+        const toggleElo = faceitData.data.playerData.games[game]?.faceit_elo;
+        const toggleLvl = faceitData.data.playerData.games[game]?.skill_level;
 
         if (!toggleStats?.lifetime) console.warn(`No hay datos de stats para ${game}`);
 
@@ -293,27 +275,21 @@ const toggleSectionButton = (section, game) => {
         const matches = document.getElementById('faceit-stats-matches');
 
         const getMatches = () => {
-            const cs2Matches = faceitResponseData.data.stats.cs2?.lifetime?.m1 ?? 0;
-            const csgoMatches = faceitResponseData.data.stats.csgo?.lifetime?.m1 ?? 0;
+            const cs2Matches = faceitData.data.stats.cs2?.lifetime?.[MATCHES] ?? 0;
+            const csgoMatches = faceitData.data.stats.csgo?.lifetime?.[MATCHES] ?? 0;
 
-            return game === 'cs2' ? cs2Matches - csgoMatches : csgoMatches;
+            return game === CONSTANTS.GAMES.CS2 ? cs2Matches - csgoMatches : csgoMatches;
         };
 
         if (lvlIcon && toggleLvl) lvlIcon.src = chrome.runtime.getURL(`imgs/faceit/lvl${toggleLvl}.svg`);
         if (elo) elo.innerText = toggleElo ?? 'N/A';
-        if (kd) kd.innerText = toggleStats?.lifetime?.k5 ?? 'N/A';
-        if (winrate) winrate.innerText = `${toggleStats?.lifetime?.k6 ?? 0} %`;
-        if (hs) hs.innerText = `${toggleStats?.lifetime?.k8 ?? 0} %`;
+        if (kd) kd.innerText = toggleStats?.lifetime?.[KD] ?? 'N/A';
+        if (winrate) winrate.innerText = `${toggleStats?.lifetime?.[WINRATE] ?? 0} %`;
+        if (hs) hs.innerText = `${toggleStats?.lifetime?.[HS] ?? 0} %`;
         if (matches) matches.innerText = getMatches().toString();
     }
 };
 
-const switchFaceitFilter = () => {
-    const faceitFilterButton = document.getElementById('faceit-filter-button');
-    faceitFilterButton?.classList.toggle('filter-applied');
-
-    displayCSRepStats(responseData, faceitFilterButton?.classList.contains('filter-applied'));
-};
 
 const createSectionStructure = () => {
     const profileCustomization = document.createElement('div');
@@ -357,11 +333,8 @@ const createTemplate = () => {
     mainContainer.id = 'cs-rep-main-container';
 
     const csRepSection = createCSRepSection();
-
     const csStatsSection = createCSStatsSection();
-
     const faceitSection = createFaceitSection();
-
     const accountStatsSeccion = createAccountStatsSection();
 
     mainContainer.appendChild(csRepSection);
@@ -373,8 +346,6 @@ const createTemplate = () => {
 };
 
 const setEventListeners = () => {
-    const copyCSRepToClipboardDiv = document.getElementById('copy-cs-rep-stats-to-clipboard');
-    copyCSRepToClipboardDiv?.addEventListener('click', () => copyCSRepStatsToClipboard());
 
     const copyCSStatsToClipboardDiv = document.getElementById('copy-csstats-stats-to-clipboard');
     copyCSStatsToClipboardDiv?.addEventListener('click', () => copyCSStatsStatsToClipboard());
@@ -391,47 +362,50 @@ const setEventListeners = () => {
     csStatsLinkTitle?.addEventListener('click', () => window.open(`https://csstats.gg/player/${userId}`, '_blank'));
 
     const faceitLinkTitle = document.getElementById('faceit-link-title');
-    faceitLinkTitle?.addEventListener('click', () => window.open(`https://www.faceit.com/es/players/${faceitResponseData.data.playerData.nickname}`, '_blank'));
+    faceitLinkTitle?.addEventListener('click', () => {
+        const nickname = CONSTANTS.state.faceitResponseData?.data?.playerData?.nickname;
+        if (nickname) window.open(`https://www.faceit.com/es/players/${nickname}`, '_blank');
+    });
 
-    const faceitFilterButton = document.getElementById('faceit-filter-button');
-    faceitFilterButton?.addEventListener('click', () => switchFaceitFilter());
 
     const csstatsCsgoButton = document.getElementById('csstats-csgo-button');
-    csstatsCsgoButton?.addEventListener('click', () => toggleSectionButton("csstats", "csgo"));
+    csstatsCsgoButton?.addEventListener('click', () => toggleSectionButton('csstats', CONSTANTS.GAMES.CSGO));
 
     const csstatsCs2Button = document.getElementById('csstats-cs2-button');
-    csstatsCs2Button?.addEventListener('click', () => toggleSectionButton("csstats", "cs2"));
+    csstatsCs2Button?.addEventListener('click', () => toggleSectionButton('csstats', CONSTANTS.GAMES.CS2));
 
     const faceitCsgoButton = document.getElementById('faceit-csgo-button');
-    faceitCsgoButton?.addEventListener('click', () => toggleSectionButton("faceit", "csgo"));
+    faceitCsgoButton?.addEventListener('click', () => toggleSectionButton('faceit', CONSTANTS.GAMES.CSGO));
 
     const faceitCs2Button = document.getElementById('faceit-cs2-button');
-    faceitCs2Button?.addEventListener('click', () => toggleSectionButton("faceit", "cs2"));
+    faceitCs2Button?.addEventListener('click', () => toggleSectionButton('faceit', CONSTANTS.GAMES.CS2));
 };
 
 (async () => {
     if (!/^https:\/\/steamcommunity\.com\/(id|profiles)\/[^/]+\/?$/.test(window.location.href)) return;
 
-    setTimeout(async () => {
-        const template = createTemplate();
+    const targetElement = await CONSTANTS.waitForElement('.profile_customization_area, .profile_leftcol');
 
-        const profileCustomizationArea = document.querySelector('.profile_customization_area');
-        const profileLeftcol = document.querySelector('.profile_leftcol');
+    const template = createTemplate();
 
-        if (profileCustomizationArea) profileCustomizationArea.insertBefore(template, profileCustomizationArea.firstChild);
-        if (!profileCustomizationArea && profileLeftcol) profileLeftcol.insertBefore(template, profileLeftcol.firstChild);
+    const profileCustomizationArea = document.querySelector('.profile_customization_area');
+    const profileLeftcol = document.querySelector('.profile_leftcol');
 
-        toggleSectionButton("csstats", "cs2");
-        toggleSectionButton("faceit", "cs2");
+    if (profileCustomizationArea) profileCustomizationArea.insertBefore(template, profileCustomizationArea.firstChild);
+    else if (profileLeftcol) profileLeftcol.insertBefore(template, profileLeftcol.firstChild);
+    else if (targetElement) targetElement.insertBefore(template, targetElement.firstChild);
+    else return; // Could not find insertion point
 
-        setEventListeners();
+    toggleSectionButton('csstats', CONSTANTS.GAMES.CS2);
+    toggleSectionButton('faceit', CONSTANTS.GAMES.CS2);
 
-        await Promise.all([
-            loadCSRepStats(),
-            loadFaceitStats(),
-            loadCSStatsStats()
-        ]);
+    setEventListeners();
 
-        await loadAccountStats();
-    }, 50);
+    await Promise.all([
+        loadCSRepStats(),
+        loadFaceitStats(),
+        loadCSStatsStats()
+    ]);
+
+    await loadAccountStats();
 })();

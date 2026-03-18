@@ -23,7 +23,7 @@ const displayCSRepStats = (responseObject, faceitAdjustment) => {
         return;
     }
 
-    const metricTypes = ['kd', 'reaction', 'preaim', 'aim', 'winrate'];
+    const metricTypes = [CONSTANTS.METRIC_TYPES.KD, CONSTANTS.METRIC_TYPES.REACTION, CONSTANTS.METRIC_TYPES.PREAIM, CONSTANTS.METRIC_TYPES.AIM, CONSTANTS.METRIC_TYPES.WINRATE];
     const metricKeys = ['kd-ratio', 'time-to-damage', 'preaim-degree', 'aim-rating', 'win-rate'];
     const suffixes = ['', ' ms', 'º', ' %', ' %'];
 

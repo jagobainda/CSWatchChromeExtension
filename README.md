@@ -69,7 +69,7 @@ CSWatchChromeExtension/
 ├── src/
 │   ├── popup.html              # Popup interface
 │   └── scripts/
-│       ├── background.js       # Injects Steam ID into the page
+│       ├── steam-context.js    # Injects Steam ID into the page
 │       ├── content.js          # Main content script (orchestrates all loaders)
 │       ├── service-worker.js   # Handles external API/fetch requests
 │       ├── sections/

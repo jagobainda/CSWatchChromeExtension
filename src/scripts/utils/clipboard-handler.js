@@ -8,25 +8,69 @@ const copyCSRepStatsToClipboard = async () => {
 
     const userNickname = document.querySelector('.actual_persona_name');
 
-    if (!kdRatio || !timeToDamage || !preaimDegree || !aimRating || !winRate || !riskRate) return
+    if (!kdRatio || !timeToDamage || !preaimDegree || !aimRating || !winRate || !riskRate) return;
 
-    const stats = `Nickname: ${userNickname.innerText} | K/D: ${kdRatio.innerText} | TTD: ${timeToDamage.innerText} | Preaim: ${preaimDegree.innerText} | Aim Rating: ${aimRating.innerText} | Win rate: ${winRate.innerText} | Risk rate: ${riskRate.innerText}`;
+    const stats = `Nickname: ${userNickname?.innerText ?? 'Unknown'} | K/D: ${kdRatio.innerText} | TTD: ${timeToDamage.innerText} | Preaim: ${preaimDegree.innerText} | Aim Rating: ${aimRating.innerText} | Win rate: ${winRate.innerText} | Risk rate: ${riskRate.innerText}`;
 
-    await navigator.clipboard.writeText(stats);
+    try {
+        await navigator.clipboard.writeText(stats);
+    } catch (error) {
+        console.error('Failed to copy CSRep stats to clipboard:', error);
+    }
 };
 
 const copyCSStatsStatsToClipboard = async () => {
-    // TODO
+    const userNickname = document.querySelector('.actual_persona_name');
+    const premiereCurrentElo = document.getElementById('csstats-stats-premiere-current-elo');
+    const premiereBestElo = document.getElementById('csstats-stats-premiere-best-elo');
+    const kd = document.getElementById('csstats-stats-kd');
+    const winrate = document.getElementById('csstats-stats-winrate');
+    const hs = document.getElementById('csstats-stats-hs');
+    const adr = document.getElementById('csstats-stats-adr');
+    const matches = document.getElementById('csstats-stats-matches');
 
-    const stats = `CSStats.gg stats copying is not yet implemented.`;
+    if (!kd || !winrate || !hs || !adr || !matches) return;
 
-    await navigator.clipboard.writeText(stats);
+    const stats = [
+        `Nickname: ${userNickname?.innerText ?? 'Unknown'}`,
+        premiereCurrentElo ? `Premiere: ${premiereCurrentElo.textContent}` : null,
+        premiereBestElo ? `Best: ${premiereBestElo.textContent}` : null,
+        `K/D: ${kd.innerText}`,
+        `Win rate: ${winrate.innerText}`,
+        `HS: ${hs.innerText}`,
+        `ADR: ${adr.innerText}`,
+        `Matches: ${matches.innerText}`
+    ].filter(Boolean).join(' | ');
+
+    try {
+        await navigator.clipboard.writeText(stats);
+    } catch (error) {
+        console.error('Failed to copy CSStats stats to clipboard:', error);
+    }
 };
 
 const copyFaceitStatsToClipboard = async () => {
-    // TODO
+    const faceitNickname = document.getElementById('faceit-user-nickname');
+    const elo = document.getElementById('faceit-stats-elo');
+    const kd = document.getElementById('faceit-stats-kd');
+    const winrate = document.getElementById('faceit-stats-winrate');
+    const hs = document.getElementById('faceit-stats-hs');
+    const matches = document.getElementById('faceit-stats-matches');
 
-    const stats = `Faceit stats copying is not yet implemented.`;
+    if (!kd || !winrate || !hs || !matches) return;
 
-    await navigator.clipboard.writeText(stats);
+    const stats = [
+        `Nickname: ${faceitNickname?.innerText ?? 'Unknown'}`,
+        elo ? `Elo: ${elo.innerText}` : null,
+        `K/D: ${kd.innerText}`,
+        `Win rate: ${winrate.innerText}`,
+        `HS: ${hs.innerText}`,
+        `Matches: ${matches.innerText}`
+    ].filter(Boolean).join(' | ');
+
+    try {
+        await navigator.clipboard.writeText(stats);
+    } catch (error) {
+        console.error('Failed to copy Faceit stats to clipboard:', error);
+    }
 };

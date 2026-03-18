@@ -19,15 +19,16 @@ const displayFaceitStats = (responseObject) => {
 
     if (!cs2?.lifetime) console.warn('No hay datos de CS2 disponibles');
 
-    const csgoMatches = csgo?.lifetime?.m1 ?? 0;
-    const cs2Matches = cs2?.lifetime?.m1 ?? 0;
+    const { KD, WINRATE, HS, MATCHES } = CONSTANTS.FACEIT_KEYS;
+    const csgoMatches = csgo?.lifetime?.[MATCHES] ?? 0;
+    const cs2Matches = cs2?.lifetime?.[MATCHES] ?? 0;
     const cs2OnlyMatches = csgo?.lifetime ? (cs2Matches - csgoMatches) : cs2Matches;
 
     const statsMap = {
         'faceit-stats-elo': games.cs2?.faceit_elo ?? 'N/A',
-        'faceit-stats-kd': cs2?.lifetime?.k5 ?? 'N/A',
-        'faceit-stats-winrate': `${cs2?.lifetime?.k6 ?? 0} %`,
-        'faceit-stats-hs': `${cs2?.lifetime?.k8 ?? 0} %`,
+        'faceit-stats-kd': cs2?.lifetime?.[KD] ?? 'N/A',
+        'faceit-stats-winrate': `${cs2?.lifetime?.[WINRATE] ?? 0} %`,
+        'faceit-stats-hs': `${cs2?.lifetime?.[HS] ?? 0} %`,
         'faceit-stats-matches': cs2OnlyMatches.toString()
     };
 
