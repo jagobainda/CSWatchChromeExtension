@@ -214,3 +214,8 @@
     font-size: 0.7em;
 }
 
+#cs-rep-stats-container {
+    min-height: 39px;
+    align-items: center;
+}
+

@@ -36,7 +36,7 @@ const createCSStatsSection = () => {
         CONSTANTS.createStatItem({ id: 'csstats-stats-matches',       initialValue: '0000',    label: 'Matches',    valueClasses: blue, containerClasses: 'hidden', dataGame: cs2 }),
         CONSTANTS.createStatItem({ id: 'csstats-last-csgo-rank',      initialValue: '',        label: 'Last',       valueClasses: 'premiere-rank-badge', containerClasses: 'hidden', dataGame: csgo, bgImage: csgoBg }),
         CONSTANTS.createStatItem({ id: 'csstats-best-csgo-rank',      initialValue: '',        label: 'Best',       valueClasses: 'premiere-rank-badge', containerClasses: 'hidden', dataGame: csgo, bgImage: csgoBg }),
-        CONSTANTS.createStatItem({ id: 'csstats-stats-csgo-matches',  initialValue: '0000',    label: 'CS:GO Wins', valueClasses: blue, containerClasses: 'hidden', dataGame: csgo }),
+        CONSTANTS.createStatItem({ id: 'csstats-stats-csgo-matches',  initialValue: '0000',    label: 'CS:GO MM Wins', valueClasses: blue, containerClasses: 'hidden', dataGame: csgo }),
     ];
 
     logoContainer.appendChild(csStatsLogo);
