@@ -1,7 +1,7 @@
 @echo off
 setlocal
 cd /d "%~dp0"
-echo Building Counter-Strike Stats Extension...
+echo Building Counter-Strike Stats...
 
 for /f "tokens=2 delims=:" %%a in ('findstr /C:"\"version\":" manifest.json') do set version=%%a
 set version=%version:"=%
@@ -22,7 +22,7 @@ for /f "usebackq tokens=* delims=" %%i in (".buildignore") do (
 
 robocopy . "temp_build" /E /NFL /NDL /NJH /NJS %EXCLUDE_DIRS% %EXCLUDE_FILES% >nul
 
-set "zipName=counter-strike-stats-extension-%version%.zip"
+set "zipName=counter-strike-stats-%version%.zip"
 echo Creating: %zipName%
 
 if exist "%zipName%" del /f "%zipName%"

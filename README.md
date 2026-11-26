@@ -1,4 +1,4 @@
-# Counter-Strike Stats Extension
+# Counter-Strike Stats
 
 A browser extension that shows Counter-Strike stats from csstats.gg, FACEIT and Leetify directly on Steam profiles. It is a single Manifest V3 code base for every supported browser, written in vanilla JavaScript with no dependencies.
 
@@ -57,7 +57,7 @@ The manifest keeps the Gecko id `cswatch@jagoba.dev` from the extension's previo
 
 ```
 ├── manifest.json                    # Single Manifest V3 for every browser
-├── build.bat                        # Builds counter-strike-stats-extension-<version>.zip
+├── build.bat                        # Builds counter-strike-stats-<version>.zip
 ├── imgs/                            # Icons, source logos and rank images
 ├── src/
 │   ├── popup.html                   # Popup skeleton
@@ -87,7 +87,7 @@ node --test
 
 ## Build
 
-On Windows, run `build.bat`. It copies the extension files (skipping everything listed in `.buildignore`, including the tests) and creates `counter-strike-stats-extension-<version>.zip` with `tar`. The same zip can be uploaded to both stores.
+On Windows, run `build.bat`. It copies the extension files (skipping everything listed in `.buildignore`, including the tests) and creates `counter-strike-stats-<version>.zip` with `tar`. The same zip can be uploaded to both stores.
 
 ## License
 

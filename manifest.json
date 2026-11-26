@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Counter-Strike Stats Extension",
+  "name": "Counter-Strike Stats",
   "version": "3.0.0",
   "description": "Displays Counter-Strike stats directly on Steam profiles",
   "minimum_chrome_version": "121",
