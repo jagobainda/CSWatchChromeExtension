@@ -62,7 +62,6 @@ export const mapFaceitPlayer = ({ player, stats = {}, bans }, now = Date.now()) 
         activatedAt: Date.parse(player.activated_at) || null,
         banned: ban ? { reason: ban.reason ?? null } : null,
         games: {
-            // FACEIT's CS2 lifetime stats include the CS:GO history migrated to CS2.
             cs2: mapGame(player.games?.cs2, stats.cs2?.lifetime, player.games?.csgo ? stats.csgo?.lifetime : null),
             csgo: mapGame(player.games?.csgo, stats.csgo?.lifetime, null)
         }
