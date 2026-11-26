@@ -4,9 +4,9 @@ const LEETIFY_METRICS = Object.freeze([
     { key: 'utilityRating', label: 'Utility' },
     { key: 'kd', label: 'K/D' },
     { key: 'winRate', label: 'Win rate' },
+    { key: 'headshotKills', label: 'HS kill %' },
     { key: 'crosshairPlacement', label: 'Crosshair placement' },
     { key: 'timeToDamage', label: 'Time to damage' },
-    { key: 'headshotKills', label: 'HS kill %' },
     { key: 'spottedAccuracy', label: 'Spotted accuracy' }
 ]);
 

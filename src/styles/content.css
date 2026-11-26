@@ -117,7 +117,8 @@
 
 #css-root #css-leetify .css-stats {
     display: grid;
-    grid-template-columns: repeat(5, auto);
+    grid-template-columns: repeat(3, 1fr);
+    row-gap: 14px;
 }
 
 #css-root #css-leetify .css-status {
