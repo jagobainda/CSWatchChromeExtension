@@ -41,6 +41,7 @@
         "src/scripts/utils/section.js",
         "src/scripts/sections/csstats-section.js",
         "src/scripts/sections/faceit-section.js",
+        "src/scripts/sections/leetify-section.js",
         "src/scripts/sections/account-section.js",
         "src/scripts/content.js"
       ],

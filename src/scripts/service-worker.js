@@ -1,27 +1,17 @@
 import { parseCSStatsBase } from './parsers/csstats-parser.js';
 import { parseSteamMemberSince } from './parsers/steam-parser.js';
 import { fetchFaceitPlayer } from './faceit.js';
+import { mapLeetifySummary } from './leetify.js';
+import { fetchResource } from './http.js';
 
 const FACEIT_API_URL = 'https://open.faceit.com/data/v4';
 const FACEIT_API_KEY = '9b120352-0750-4534-a1d2-e82a4838707e';
 
 const STEAM_ID_PATTERN = /^7656\d{13}$/;
-const TIMEOUT_MS = 10000;
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const ERROR_CODES = new Set(['not_found', 'blocked', 'http', 'timeout', 'invalid']);
-const STATUS_ERRORS = { 403: 'blocked', 404: 'not_found', 429: 'blocked' };
 
 const cache = new Map();
-
-const fetchResource = async (url, read, init = {}) => {
-    try {
-        const response = await fetch(url, { ...init, signal: AbortSignal.timeout(TIMEOUT_MS) });
-        if (!response.ok) throw new Error(STATUS_ERRORS[response.status] ?? 'http');
-        return await response[read]();
-    } catch (error) {
-        throw error.name === 'TimeoutError' ? new Error('timeout') : error;
-    }
-};
 
 const fetchCSStats = async (steamId) => {
     const data = parseCSStatsBase(await fetchResource(`https://csstats.gg/player/${steamId}`, 'text'));
@@ -44,7 +34,15 @@ const fetchFaceit = (steamId) => fetchFaceitPlayer(steamId, (path) => fetchResou
     headers: { Authorization: `Bearer ${FACEIT_API_KEY}` }
 }));
 
-const FETCHERS = { csstats: fetchCSStats, faceit: fetchFaceit, steam: fetchSteam };
+const fetchLeetify = async (steamId) => {
+    const data = mapLeetifySummary(await fetchResource(`https://api.cs-prod.leetify.com/api/profile/${steamId}/browser-extension-summary`, 'json'));
+
+    if (Object.values(data).every(metric => metric === null)) throw new Error('not_found');
+
+    return data;
+};
+
+const FETCHERS = { csstats: fetchCSStats, faceit: fetchFaceit, leetify: fetchLeetify, steam: fetchSteam };
 
 const getCached = (type, steamId) => {
     const key = `${type}:${steamId}`;
