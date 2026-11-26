@@ -15,6 +15,7 @@ test('summary with positive z-scores', () => {
         timeToDamage: { value: '461ms', zScore: 0, average: '498ms' },
         headshotKills: { value: '47%', zScore: 2, average: '46%' },
         spottedAccuracy: { value: '39%', zScore: 0, average: '38%' },
+        sprayAccuracy: { value: '39%', zScore: 0, average: '32%' },
         kd: { value: '1.35', zScore: 2, average: null },
         winRate: { value: '60%', zScore: 2, average: null }
     });
@@ -56,6 +57,6 @@ test('missing summary maps to no metrics', () => {
     const summary = mapLeetifySummary(null);
 
     assert.deepEqual(summary, mapLeetifySummary({}));
-    assert.equal(Object.keys(summary).length, 9);
+    assert.equal(Object.keys(summary).length, 10);
     assert.ok(Object.values(summary).every((metric) => metric === null));
 });

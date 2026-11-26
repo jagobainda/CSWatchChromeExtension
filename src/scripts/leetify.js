@@ -5,7 +5,8 @@ const METRIC_TITLES = Object.freeze({
     crosshairPlacement: 'Crosshair Placement',
     timeToDamage: 'Time to Damage',
     headshotKills: 'Headshot Kill Percentage',
-    spottedAccuracy: 'Accuracy (Enemy Spotted)'
+    spottedAccuracy: 'Accuracy (Enemy Spotted)',
+    sprayAccuracy: 'Spray Accuracy'
 });
 
 const toShortText = (value) => (typeof value === 'string' && /^\S{1,12}$/.test(value) ? value : null);

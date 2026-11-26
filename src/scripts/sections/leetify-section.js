@@ -5,9 +5,10 @@ const LEETIFY_METRICS = Object.freeze([
     { key: 'kd', label: 'K/D' },
     { key: 'winRate', label: 'Win rate' },
     { key: 'headshotKills', label: 'HS kill %' },
-    { key: 'crosshairPlacement', label: 'Crosshair placement' },
+    { key: 'crosshairPlacement', label: 'Crosshair' },
     { key: 'timeToDamage', label: 'Time to damage' },
-    { key: 'spottedAccuracy', label: 'Spotted accuracy' }
+    { key: 'spottedAccuracy', label: 'Accuracy' },
+    { key: 'sprayAccuracy', label: 'Spray accuracy' }
 ]);
 
 const getZScoreClass = (zScore) => (zScore === null ? null : `css-z-${zScore < 0 ? `n${-zScore}` : zScore}`);
