@@ -4,7 +4,12 @@ import { fetchResource } from '../src/scripts/http.js';
 
 const RESOURCE_URL = 'https://example.invalid/resource';
 
-for (const [status, code] of [[403, 'blocked'], [429, 'blocked'], [404, 'not_found'], [500, 'http']]) {
+for (const [status, code] of [
+    [403, 'blocked'],
+    [429, 'blocked'],
+    [404, 'not_found'],
+    [500, 'http']
+]) {
     test(`HTTP ${status} is reported as ${code}`, async (context) => {
         context.mock.method(globalThis, 'fetch', async () => new Response('', { status }));
 

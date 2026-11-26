@@ -1,7 +1,7 @@
 const getSteamId = () => {
-    const steamId = [...document.scripts]
-        .map(script => script.textContent.match(/g_rgProfileData\s*=\s*\{[^]*?"steamid":"(\d{17})"/)?.[1])
-        .find(Boolean) ?? location.pathname.match(/^\/profiles\/(\d{17})/)?.[1];
+    const steamId =
+        [...document.scripts].map((script) => script.textContent.match(/g_rgProfileData\s*=\s*\{[^]*?"steamid":"(\d{17})"/)?.[1]).find(Boolean) ??
+        location.pathname.match(/^\/profiles\/(\d{17})/)?.[1];
 
     return CONSTANTS.STEAM_ID_PATTERN.test(steamId ?? '') ? steamId : null;
 };
@@ -18,12 +18,16 @@ const getSteamId = () => {
     const faceitRequest = request('faceit', steamId);
     const fragment = document.createDocumentFragment();
 
-    fragment.append(el('div', { id: CONSTANTS.ROOT_ID },
-        createCSStatsSection(steamId, request('csstats', steamId), nickname),
-        createFaceitSection(faceitRequest),
-        createLeetifySection(steamId, request('leetify', steamId)),
-        createAccountSection(steamId, request('steam', steamId), faceitRequest)
-    ));
+    fragment.append(
+        el(
+            'div',
+            { id: CONSTANTS.ROOT_ID },
+            createCSStatsSection(steamId, request('csstats', steamId), nickname),
+            createFaceitSection(faceitRequest),
+            createLeetifySection(steamId, request('leetify', steamId)),
+            createAccountSection(steamId, request('steam', steamId), faceitRequest)
+        )
+    );
 
     target.prepend(fragment);
 })();

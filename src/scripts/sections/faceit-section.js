@@ -1,6 +1,7 @@
 const STEAM_FLAGS_URL = 'https://community.fastly.steamstatic.com/public/images/countryflags/';
 
-const createFlag = (country) => el('img', { className: 'css-flag', src: `${STEAM_FLAGS_URL}${country}.gif`, alt: country.toUpperCase(), title: country.toUpperCase(), onerror: (event) => event.target.remove() });
+const createFlag = (country) =>
+    el('img', { className: 'css-flag', src: `${STEAM_FLAGS_URL}${country}.gif`, alt: country.toUpperCase(), title: country.toUpperCase(), onerror: (event) => event.target.remove() });
 
 const formatFaceitGame = (game) => ({
     elo: game?.elo ?? CONSTANTS.PLACEHOLDER,
@@ -15,7 +16,9 @@ const createFaceitStats = (gameKey, game) => {
     const valueClass = 'css-text-faceit';
 
     return [
-        el('div', { className: 'css-stat css-faceit-level', dataset: { game: gameKey } },
+        el(
+            'div',
+            { className: 'css-stat css-faceit-level', dataset: { game: gameKey } },
             el('img', { className: 'css-faceit-level-icon', src: chrome.runtime.getURL(`imgs/faceit/${game?.level ? `lvl${game.level}` : 'unranked'}.svg`), alt: 'FACEIT level' }),
             el('div', { className: 'css-stat-label css-faceit-elo' }, String(elo))
         ),
@@ -35,13 +38,20 @@ const createFaceitSection = (faceitRequest) => {
 
         section.setAvailableGames(games);
 
-        section.render([
-            el('div', { className: 'css-badge' }, country && createFlag(country), nickname),
-            ...CONSTANTS.GAME_TOGGLES.flatMap(({ game }) => createFaceitStats(game, games[game]))
-        ], (game) => {
-            const { elo, kd, winRate, headshots, matches } = formatFaceitGame(games[game]);
-            return [['Nickname', nickname], ['Elo', elo], ['K/D', kd], ['Win rate', winRate], ['HS', headshots], ['Matches', matches]];
-        });
+        section.render(
+            [el('div', { className: 'css-badge' }, country && createFlag(country), nickname), ...CONSTANTS.GAME_TOGGLES.flatMap(({ game }) => createFaceitStats(game, games[game]))],
+            (game) => {
+                const { elo, kd, winRate, headshots, matches } = formatFaceitGame(games[game]);
+                return [
+                    ['Nickname', nickname],
+                    ['Elo', elo],
+                    ['K/D', kd],
+                    ['Win rate', winRate],
+                    ['HS', headshots],
+                    ['Matches', matches]
+                ];
+            }
+        );
     });
 
     return section.element;

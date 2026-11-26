@@ -11,7 +11,7 @@ const STAT_KEYS = Object.freeze({
 const NO_STATS = Object.freeze({ kd: null, winRate: null, headshots: null, matches: null });
 const NO_LIFETIME = Object.freeze({ lifetime: null });
 
-const toNumber = (value) => value === undefined || value === null || value === '' || !Number.isFinite(Number(value)) ? null : Number(value);
+const toNumber = (value) => (value === undefined || value === null || value === '' || !Number.isFinite(Number(value)) ? null : Number(value));
 
 const mapStats = (lifetime, excluded) => {
     const total = (key) => {
@@ -26,7 +26,7 @@ const mapStats = (lifetime, excluded) => {
     const matches = Math.max(0, matchesTotal);
     const average = (key, digits = 0, scale = 1) => {
         const value = total(key);
-        return matches > 0 && value !== null && value >= 0 ? Number((value * scale / matches).toFixed(digits)) : null;
+        return matches > 0 && value !== null && value >= 0 ? Number(((value * scale) / matches).toFixed(digits)) : null;
     };
 
     return {
@@ -49,7 +49,7 @@ const mapGame = (gameData, lifetime, excluded) => {
     };
 };
 
-const findActiveBan = (bans, now) => bans?.items?.find(ban => !ban.ends_at || Date.parse(ban.ends_at) > now);
+const findActiveBan = (bans, now) => bans?.items?.find((ban) => !ban.ends_at || Date.parse(ban.ends_at) > now);
 
 export const mapFaceitPlayer = ({ player, stats = {}, bans }, now = Date.now()) => {
     const profileUrl = player.faceit_url?.replace('{lang}', 'en');
@@ -81,12 +81,9 @@ const findPlayer = async (steamId, getJson) => {
 export const fetchFaceitPlayer = async (steamId, getJson) => {
     const player = await findPlayer(steamId, getJson);
     const playerPath = `/players/${encodeURIComponent(player.player_id)}`;
-    const games = GAMES.filter(game => player.games?.[game]);
+    const games = GAMES.filter((game) => player.games?.[game]);
 
-    const [bans, ...gameStats] = await Promise.allSettled([
-        getJson(`${playerPath}/bans`),
-        ...games.map(game => getJson(`${playerPath}/stats/${game}`))
-    ]);
+    const [bans, ...gameStats] = await Promise.allSettled([getJson(`${playerPath}/bans`), ...games.map((game) => getJson(`${playerPath}/stats/${game}`))]);
 
     return mapFaceitPlayer({
         player,

@@ -10,7 +10,7 @@ const LEETIFY_METRICS = Object.freeze([
     { key: 'spottedAccuracy', label: 'Spotted accuracy' }
 ]);
 
-const getZScoreClass = (zScore) => zScore === null ? null : `css-z-${zScore < 0 ? `n${-zScore}` : zScore}`;
+const getZScoreClass = (zScore) => (zScore === null ? null : `css-z-${zScore < 0 ? `n${-zScore}` : zScore}`);
 
 const createLeetifySection = (steamId, leetifyRequest) => {
     const section = createSection({
@@ -23,12 +23,14 @@ const createLeetifySection = (steamId, leetifyRequest) => {
 
     section.load(leetifyRequest, (data) => {
         section.render(
-            LEETIFY_METRICS.map(({ key, label }) => createStat({
-                label,
-                value: data[key]?.value,
-                valueClass: getZScoreClass(data[key]?.zScore ?? null),
-                title: data[key]?.average && `Average: ${data[key].average}`
-            })),
+            LEETIFY_METRICS.map(({ key, label }) =>
+                createStat({
+                    label,
+                    value: data[key]?.value,
+                    valueClass: getZScoreClass(data[key]?.zScore ?? null),
+                    title: data[key]?.average && `Average: ${data[key].average}`
+                })
+            ),
             () => LEETIFY_METRICS.map(({ key, label }) => [label, data[key]?.value ?? CONSTANTS.PLACEHOLDER])
         );
     });

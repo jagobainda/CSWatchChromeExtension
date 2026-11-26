@@ -9,10 +9,11 @@
       "id": "cswatch@jagoba.dev",
       "strict_min_version": "140.0",
       "data_collection_permissions": {
-        "required": [
-          "browsingActivity"
-        ]
+        "required": ["browsingActivity"]
       }
+    },
+    "gecko_android": {
+      "strict_min_version": "142.0"
     }
   },
   "icons": {
@@ -30,10 +31,7 @@
   },
   "content_scripts": [
     {
-      "matches": [
-        "https://steamcommunity.com/id/*",
-        "https://steamcommunity.com/profiles/*"
-      ],
+      "matches": ["https://steamcommunity.com/id/*", "https://steamcommunity.com/profiles/*"],
       "js": [
         "src/scripts/utils/constants.js",
         "src/scripts/utils/dom.js",
@@ -45,35 +43,19 @@
         "src/scripts/sections/account-section.js",
         "src/scripts/content.js"
       ],
-      "css": [
-        "src/styles/content.css"
-      ]
+      "css": ["src/styles/content.css"]
     }
   ],
-  "host_permissions": [
-    "https://csstats.gg/*",
-    "https://open.faceit.com/*",
-    "https://steamcommunity.com/*"
-  ],
+  "host_permissions": ["https://csstats.gg/*", "https://open.faceit.com/*", "https://steamcommunity.com/*"],
   "web_accessible_resources": [
     {
-      "resources": [
-        "imgs/csgo/*",
-        "imgs/faceit/*",
-        "imgs/icons/*",
-        "imgs/logos/*",
-        "imgs/premiere/*"
-      ],
-      "matches": [
-        "https://steamcommunity.com/*"
-      ]
+      "resources": ["imgs/csgo/*", "imgs/faceit/*", "imgs/icons/*", "imgs/logos/*", "imgs/premiere/*"],
+      "matches": ["https://steamcommunity.com/*"]
     }
   ],
   "background": {
     "service_worker": "src/scripts/service-worker.js",
-    "scripts": [
-      "src/scripts/service-worker.js"
-    ],
+    "scripts": ["src/scripts/service-worker.js"],
     "type": "module"
   }
 }

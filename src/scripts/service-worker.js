@@ -30,14 +30,17 @@ const fetchSteam = async (steamId) => {
     return { memberSince };
 };
 
-const fetchFaceit = (steamId) => fetchFaceitPlayer(steamId, (path) => fetchResource(`${FACEIT_API_URL}${path}`, 'json', {
-    headers: { Authorization: `Bearer ${FACEIT_API_KEY}` }
-}));
+const fetchFaceit = (steamId) =>
+    fetchFaceitPlayer(steamId, (path) =>
+        fetchResource(`${FACEIT_API_URL}${path}`, 'json', {
+            headers: { Authorization: `Bearer ${FACEIT_API_KEY}` }
+        })
+    );
 
 const fetchLeetify = async (steamId) => {
     const data = mapLeetifySummary(await fetchResource(`https://api.cs-prod.leetify.com/api/profile/${steamId}/browser-extension-summary`, 'json'));
 
-    if (Object.values(data).every(metric => metric === null)) throw new Error('not_found');
+    if (Object.values(data).every((metric) => metric === null)) throw new Error('not_found');
 
     return data;
 };
@@ -71,8 +74,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
 
     getCached(type, steamId).then(
-        data => sendResponse({ ok: true, data }),
-        error => sendResponse({ ok: false, error: ERROR_CODES.has(error.message) ? error.message : 'http' })
+        (data) => sendResponse({ ok: true, data }),
+        (error) => sendResponse({ ok: false, error: ERROR_CODES.has(error.message) ? error.message : 'http' })
     );
 
     return true;

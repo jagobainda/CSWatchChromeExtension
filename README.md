@@ -6,10 +6,10 @@ A browser extension that shows Counter-Strike stats from csstats.gg, FACEIT and 
 
 Open any Steam profile (`steamcommunity.com/id/*` or `steamcommunity.com/profiles/*`) and the extension adds these sections at the top of the profile:
 
--   **CSSTATS.GG**: wins and current and best Premier rating for every season (the 3 most recent are shown, the rest with "Show all"), plus the last and best CS:GO competitive rank and CS:GO matchmaking wins.
--   **FACEIT**: level, ELO, K/D, win rate, headshot percentage and matches for CS2 and CS:GO, with a warning if the account is banned. The CS2 stats leave out the CS:GO history that FACEIT migrated into CS2.
--   **LEETIFY**: Leetify Rating, Aim Rating, Utility Rating, K/D, win rate, crosshair placement, time to damage, headshot kill percentage and accuracy on spotted enemies. Each value is colored by how far it is from the average player, and shows the average value on hover when Leetify provides it.
--   **ACCOUNT STATS**: Steam account creation date (from the Years of Service badge), FACEIT account creation date, and the number of days between them.
+- **CSSTATS.GG**: wins and current and best Premier rating for every season (the 3 most recent are shown, the rest with "Show all"), plus the last and best CS:GO competitive rank and CS:GO matchmaking wins.
+- **FACEIT**: level, ELO, K/D, win rate, headshot percentage and matches for CS2 and CS:GO, with a warning if the account is banned. The CS2 stats leave out the CS:GO history that FACEIT migrated into CS2.
+- **LEETIFY**: Leetify Rating, Aim Rating, Utility Rating, K/D, win rate, crosshair placement, time to damage, headshot kill percentage and accuracy on spotted enemies. Each value is colored by how far it is from the average player, and shows the average value on hover when Leetify provides it.
+- **ACCOUNT STATS**: Steam account creation date (from the Years of Service badge), FACEIT account creation date, and the number of days between them.
 
 Every section has a link to the player's page on the source site. Sections with stats for both CS2 and CS:GO have a toggle to switch between them, and a button that copies the stats shown to the clipboard. If a source has no data for the player, the section says so instead of showing empty values.
 
@@ -21,29 +21,29 @@ csstats.gg serves those stats from an endpoint (`/player/{id}/stats`) behind a C
 
 ### From the stores
 
--   Chromium-based browsers (Chrome, Edge, Brave, Opera…): [Chrome Web Store](https://chromewebstore.google.com/detail/nklafihgaifhoahbfcfiaemfmpoplkch)
--   Firefox: [Firefox Add-ons](https://addons.mozilla.org/firefox/addon/2947359/)
+- Chromium-based browsers (Chrome, Edge, Brave, Opera…): [Chrome Web Store](https://chromewebstore.google.com/detail/nklafihgaifhoahbfcfiaemfmpoplkch)
+- Firefox: [Firefox Add-ons](https://addons.mozilla.org/firefox/addon/2947359/)
 
 ### Unpacked (development)
 
 1. Clone the repository:
 
-    ```bash
-    git clone https://github.com/jagobainda/CounterStrikeStatsExtension.git
-    ```
+   ```bash
+   git clone https://github.com/jagobainda/CounterStrikeStatsExtension.git
+   ```
 
 2. Load it in your browser:
-    - **Chromium-based browsers** (121 or later): open `chrome://extensions/`, enable "Developer mode", click "Load unpacked" and select the project folder.
-    - **Firefox** (140 or later): open `about:debugging#/runtime/this-firefox`, click "Load Temporary Add-on…" and select `manifest.json`.
+   - **Chromium-based browsers** (121 or later): open `chrome://extensions/`, enable "Developer mode", click "Load unpacked" and select the project folder.
+   - **Firefox** (140 or later): open `about:debugging#/runtime/this-firefox`, click "Load Temporary Add-on…" and select `manifest.json`.
 
 ## Permissions
 
-| Permission | Why |
-|---|---|
-| Content scripts on `https://steamcommunity.com/id/*` and `/profiles/*` | Read the profile's SteamID64 and show the stats on the page. |
-| `https://steamcommunity.com/*` | Read the account creation date from the profile's Years of Service badge page. |
-| `https://csstats.gg/*` | Read the player's public csstats.gg page, which has no API or CORS support. |
-| `https://open.faceit.com/*` | Query the FACEIT Data API. |
+| Permission                                                             | Why                                                                            |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| Content scripts on `https://steamcommunity.com/id/*` and `/profiles/*` | Read the profile's SteamID64 and show the stats on the page.                   |
+| `https://steamcommunity.com/*`                                         | Read the account creation date from the profile's Years of Service badge page. |
+| `https://csstats.gg/*`                                                 | Read the player's public csstats.gg page, which has no API or CORS support.    |
+| `https://open.faceit.com/*`                                            | Query the FACEIT Data API.                                                     |
 
 Leetify's public API allows cross-origin requests, so it needs no extra permission.
 
@@ -72,18 +72,25 @@ The manifest keeps the Gecko id `cswatch@jagoba.dev` from the extension's previo
 │   │   ├── sections/                # One file per section (build, load and render)
 │   │   └── utils/                   # DOM helper, section pattern, messaging and constants
 │   └── styles/                      # Content (scoped under #css-root) and popup styles
-└── tests/                           # node:test suites and real response fixtures
+├── tests/                           # node:test suites and real response fixtures
+└── .github/                         # CI workflow and Dependabot
 ```
 
 The interface is built from JavaScript with a small `el(tag, props, ...children)` helper. External data is only ever inserted as text.
 
-## Tests
+## Development
 
-The parsers are tested against real responses saved in `tests/fixtures/`. You need a recent Node.js version (tested with Node.js 24) and nothing else to install:
+You need Node.js 24. The extension itself has no dependencies; npm only installs the development tools ([Prettier](https://prettier.io/) and [web-ext](https://github.com/mozilla/web-ext)):
 
 ```bash
-node --test
+npm ci
+npm run format        # Format every file with Prettier
+npm run format:check  # Check the formatting without changing files
+npm test              # node:test suites, run against real responses saved in tests/fixtures/
+npm run lint          # Lint the extension with web-ext
 ```
+
+The CI workflow (`.github/workflows/ci.yml`) runs the formatting check, the tests and the lint on every pull request and on every push to `main`. Dependabot keeps the development tools and the GitHub Actions up to date.
 
 ## Build
 

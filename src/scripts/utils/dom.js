@@ -10,7 +10,7 @@ const el = (tag, props, ...children) => {
         else element.setAttribute(key, value === true ? '' : value);
     });
 
-    element.append(...children.flat().filter(child => child != null && child !== false));
+    element.append(...children.flat().filter((child) => child != null && child !== false));
 
     return element;
 };

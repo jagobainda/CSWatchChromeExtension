@@ -8,9 +8,9 @@ const METRIC_TITLES = Object.freeze({
     spottedAccuracy: 'Accuracy (Enemy Spotted)'
 });
 
-const toShortText = (value) => typeof value === 'string' && /^\S{1,12}$/.test(value) ? value : null;
+const toShortText = (value) => (typeof value === 'string' && /^\S{1,12}$/.test(value) ? value : null);
 
-const toZScore = (value) => Number.isFinite(value) ? Math.max(-2, Math.min(2, Math.round(value))) : null;
+const toZScore = (value) => (Number.isFinite(value) ? Math.max(-2, Math.min(2, Math.round(value))) : null);
 
 const mapMetric = (metric) => {
     const value = toShortText(metric?.value);
@@ -20,10 +20,10 @@ const mapMetric = (metric) => {
 
 export const mapLeetifySummary = (summary) => {
     const { ratings, aimRatingSkills, aimAuxSkills, kdRatio, winRate } = summary ?? {};
-    const metrics = [ratings, aimRatingSkills, aimAuxSkills].flatMap(list => Array.isArray(list) ? list : []);
+    const metrics = [ratings, aimRatingSkills, aimAuxSkills].flatMap((list) => (Array.isArray(list) ? list : []));
 
     return {
-        ...Object.fromEntries(Object.entries(METRIC_TITLES).map(([key, title]) => [key, mapMetric(metrics.find(metric => metric?.title === title))])),
+        ...Object.fromEntries(Object.entries(METRIC_TITLES).map(([key, title]) => [key, mapMetric(metrics.find((metric) => metric?.title === title))])),
         kd: mapMetric(kdRatio),
         winRate: mapMetric(winRate)
     };

@@ -13,13 +13,16 @@ const parseRank = (html) => {
     return rank >= 1 && rank <= 18 ? rank : null;
 };
 
-const nullIfEmpty = (object) => Object.values(object).some(value => value !== null) ? object : null;
+const nullIfEmpty = (object) => (Object.values(object).some((value) => value !== null) ? object : null);
 
 const parseSeasonName = (html) => html?.match(/^\s*([^\s<][^<\r\n]{0,19}?)\s*</)?.[1] ?? null;
 
 const parseCurrentSeason = (html) => {
     const cells = Object.fromEntries(
-        html.split('class="pm-c"').slice(1).map(cell => [cell.match(/class="k">([^<]+)</)?.[1], cell])
+        html
+            .split('class="pm-c"')
+            .slice(1)
+            .map((cell) => [cell.match(/class="k">([^<]+)</)?.[1], cell])
     );
 
     return {
@@ -47,15 +50,14 @@ const parsePremierSeasons = (html) => {
 
     const [currentSeason, ...pastSeasons] = section.split(/class="rk-row[^"]*"/);
 
-    return [parseCurrentSeason(currentSeason), ...pastSeasons.map(parsePastSeason)]
-        .filter(({ season, wins, current, best }) => season && [wins, current, best].some(value => value !== null));
+    return [parseCurrentSeason(currentSeason), ...pastSeasons.map(parsePastSeason)].filter(({ season, wins, current, best }) => season && [wins, current, best].some((value) => value !== null));
 };
 
 const parseCSGO = (html) => {
     const row = html.match(/class="rk-row is-legacy">([\s\S]*?)<\/div>/)?.[1];
     if (!row) return null;
 
-    const [current, best] = [...row.matchAll(/class="rk-v">([\s\S]*?)<\/span>/g)].map(match => match[1]);
+    const [current, best] = [...row.matchAll(/class="rk-v">([\s\S]*?)<\/span>/g)].map((match) => match[1]);
 
     return nullIfEmpty({
         wins: toNumber(row.match(/class="rk-w">([^<]*)</)?.[1]),

@@ -32,7 +32,10 @@ test('summary with negative z-scores', () => {
 
 test('ratings are found by title and unexpected values are dropped', () => {
     const summary = mapLeetifySummary({
-        ratings: [{ title: 'Utility Rating', value: '<img src=x onerror=alert(1)>', zScore: 7 }, { title: 'Aim Rating', value: '50', zScore: 7.6 }],
+        ratings: [
+            { title: 'Utility Rating', value: '<img src=x onerror=alert(1)>', zScore: 7 },
+            { title: 'Aim Rating', value: '50', zScore: 7.6 }
+        ],
         kdRatio: { value: '1.00', zScore: 'high' }
     });
 
@@ -54,5 +57,5 @@ test('missing summary maps to no metrics', () => {
 
     assert.deepEqual(summary, mapLeetifySummary({}));
     assert.equal(Object.keys(summary).length, 9);
-    assert.ok(Object.values(summary).every(metric => metric === null));
+    assert.ok(Object.values(summary).every((metric) => metric === null));
 });

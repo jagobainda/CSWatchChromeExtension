@@ -46,7 +46,8 @@ test('Cloudflare block page yields no data', () => {
 });
 
 test('rating values are never taken from markup', () => {
-    const html = '<span class="sec-t">Premier</span><span class="sec-s">Season 5</span><div class="pm-now"><div class="pm-c"><span class="k">Current</span><span class="v"><div class="cs2rating"><span>&lt;img src=x onerror=alert(1)&gt;<small>,235</small></span></div></span></div></div>';
+    const html =
+        '<span class="sec-t">Premier</span><span class="sec-s">Season 5</span><div class="pm-now"><div class="pm-c"><span class="k">Current</span><span class="v"><div class="cs2rating"><span>&lt;img src=x onerror=alert(1)&gt;<small>,235</small></span></div></span></div></div>';
 
     assert.deepEqual(parseCSStatsBase(html).premierSeasons, []);
 });
@@ -55,11 +56,17 @@ test('Premier seasons stop at the next section even with extra classes', () => {
     const html = fixture('csstats-base.html').replace(/<div class="sec">(\s*<div class="rk-row fc)/, '<div class="sec sec-ranks">$1');
 
     assert.notEqual(html, fixture('csstats-base.html'));
-    assert.deepEqual(parseCSStatsBase(html).premierSeasons.map(({ season }) => season), ['Season 5', 'S4', 'S3', 'S2', 'S1']);
+    assert.deepEqual(
+        parseCSStatsBase(html).premierSeasons.map(({ season }) => season),
+        ['Season 5', 'S4', 'S3', 'S2', 'S1']
+    );
 });
 
 test('blank season names are dropped', () => {
     const html = fixture('csstats-base.html').replace('<span class="sec-s">Season 5', '<span class="sec-s">   ');
 
-    assert.deepEqual(parseCSStatsBase(html).premierSeasons.map(({ season }) => season), ['S4', 'S3', 'S2', 'S1']);
+    assert.deepEqual(
+        parseCSStatsBase(html).premierSeasons.map(({ season }) => season),
+        ['S4', 'S3', 'S2', 'S1']
+    );
 });

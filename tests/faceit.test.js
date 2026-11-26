@@ -78,10 +78,11 @@ test('missing lifetime totals are unknown instead of zero or negative', () => {
     const { Wins, ...cs2WithoutWins } = cs2.lifetime;
     const { 'K/D Ratio': kd, ...csgoWithoutKd } = csgo.lifetime;
     const { Matches, ...cs2WithoutMatches } = cs2.lifetime;
-    const map = (cs2Lifetime, csgoLifetime) => mapFaceitPlayer({
-        player: fixture('faceit-player-lookup-cs2'),
-        stats: { cs2: { lifetime: cs2Lifetime }, csgo: { lifetime: csgoLifetime } }
-    }).games.cs2;
+    const map = (cs2Lifetime, csgoLifetime) =>
+        mapFaceitPlayer({
+            player: fixture('faceit-player-lookup-cs2'),
+            stats: { cs2: { lifetime: cs2Lifetime }, csgo: { lifetime: csgoLifetime } }
+        }).games.cs2;
 
     assert.deepEqual(map(cs2WithoutWins, csgo.lifetime), { level: 10, elo: 3669, kd: 1.39, winRate: null, headshots: 51, matches: 1334 });
     assert.deepEqual(map(cs2.lifetime, csgoWithoutKd), { level: 10, elo: 3669, kd: null, winRate: 56, headshots: 51, matches: 1334 });
@@ -129,7 +130,10 @@ test('player with CS2 only does not request CS:GO stats', async () => {
         cs2: { level: 10, elo: 2816, kd: 1.2, winRate: 54, headshots: 37, matches: 921 },
         csgo: null
     });
-    assert.equal(requested.some(path => path.includes('csgo')), false);
+    assert.equal(
+        requested.some((path) => path.includes('csgo')),
+        false
+    );
 });
 
 test('player without account on either game', async () => {
@@ -181,7 +185,10 @@ test('player with CS:GO only is found with the CS:GO lookup', async () => {
         cs2: null,
         csgo: { level: 10, elo: 4416, kd: 1.35, winRate: 53, headshots: 47, matches: 4477 }
     });
-    assert.equal(requested.some(path => path.endsWith('/stats/cs2')), false);
+    assert.equal(
+        requested.some((path) => path.endsWith('/stats/cs2')),
+        false
+    );
 });
 
 test('expired ban is ignored and active ban is reported', () => {
