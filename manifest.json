@@ -1,8 +1,20 @@
 {
   "manifest_version": 3,
-  "name": "Counter-Strike Stats Viewer",
-  "version": "2.0.0",
-  "description": "Extension that displays Counter-Strike stats directly on the Steam profile",
+  "name": "Counter-Strike Stats Extension",
+  "version": "3.0.0",
+  "description": "Displays Counter-Strike stats directly on Steam profiles",
+  "minimum_chrome_version": "121",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "cswatch@jagoba.dev",
+      "strict_min_version": "140.0",
+      "data_collection_permissions": {
+        "required": [
+          "browsingActivity"
+        ]
+      }
+    }
+  },
   "icons": {
     "16": "imgs/logo16.png",
     "48": "imgs/logo48.png",
@@ -19,8 +31,8 @@
   "content_scripts": [
     {
       "matches": [
-        "*://steamcommunity.com/id/*",
-        "*://steamcommunity.com/profiles/*"
+        "https://steamcommunity.com/id/*",
+        "https://steamcommunity.com/profiles/*"
       ],
       "js": [
         "src/scripts/utils/constants.js",
@@ -38,18 +50,20 @@
     }
   ],
   "host_permissions": [
-    "*://steamcommunity.com/*",
-    "*://shapi.jagoba.dev/*",
-    "*://csstats.gg/*"
+    "https://csstats.gg/*",
+    "https://steamcommunity.com/*"
   ],
   "web_accessible_resources": [
     {
       "resources": [
-        "imgs/*.png",
-        "imgs/**/*.svg"
+        "imgs/csgo/*",
+        "imgs/faceit/*",
+        "imgs/icons/*",
+        "imgs/logos/*",
+        "imgs/premiere/*"
       ],
       "matches": [
-        "*://steamcommunity.com/*"
+        "https://steamcommunity.com/*"
       ]
     }
   ],

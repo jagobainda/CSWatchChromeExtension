@@ -27,12 +27,6 @@ const fetchCSStats = async (steamId) => {
     return data;
 };
 
-const fetchFaceit = (steamId) => fetchResource('https://shapi.jagoba.dev/External/GetFaceitCompleteData', 'json', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(steamId)
-});
-
 const fetchSteam = async (steamId) => {
     const html = await fetchResource(`https://steamcommunity.com/profiles/${steamId}/badges/1?l=english`, 'text');
     const memberSince = parseSteamMemberSince(html);
@@ -42,7 +36,7 @@ const fetchSteam = async (steamId) => {
     return { memberSince };
 };
 
-const FETCHERS = { csstats: fetchCSStats, faceit: fetchFaceit, steam: fetchSteam };
+const FETCHERS = { csstats: fetchCSStats, steam: fetchSteam };
 
 const getCached = (type, steamId) => {
     const key = `${type}:${steamId}`;

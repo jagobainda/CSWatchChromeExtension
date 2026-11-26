@@ -4,11 +4,11 @@ const formatDate = (timestamp) => timestamp === null
     ? 'Unknown'
     : new Date(timestamp).toISOString().slice(0, 10).split('-').reverse().join('-');
 
-const createAccountSection = (steamRequest, faceitRequest) => {
+const createAccountSection = (steamId, steamRequest, faceitRequest) => {
     const section = createSection({
         id: 'css-account',
         title: 'ACCOUNT STATS',
-        href: 'https://chromewebstore.google.com/detail/cswatch-stats-viewer/nklafihgaifhoahbfcfiaemfmpoplkch'
+        href: `https://steamcommunity.com/profiles/${steamId}/badges/1`
     });
 
     section.load(Promise.allSettled([steamRequest, faceitRequest]), ([steam, faceit]) => {
@@ -21,11 +21,6 @@ const createAccountSection = (steamRequest, faceitRequest) => {
             : 'Unknown';
 
         section.render([
-            createStat({
-                label: 'Estimated IDLE hours',
-                value: 'Coming soon',
-                title: 'Estimation of IDLE hours or hours spent outside official/Faceit servers. Since it is an estimate, it may have a certain margin of error'
-            }),
             createStat({ label: 'Steam creation', value: steamDate, valueClass: 'css-text-csstats' }),
             createStat({ label: 'Faceit creation', value: faceitDate, valueClass: 'css-text-faceit' }),
             createStat({ label: 'Creation difference', value: difference })

@@ -21,7 +21,7 @@ const getSteamId = () => {
     fragment.append(el('div', { id: CONSTANTS.ROOT_ID },
         createCSStatsSection(steamId, request('csstats', steamId), nickname),
         createFaceitSection(faceitRequest),
-        createAccountSection(request('steam', steamId), faceitRequest)
+        createAccountSection(steamId, request('steam', steamId), faceitRequest)
     ));
 
     target.prepend(fragment);
