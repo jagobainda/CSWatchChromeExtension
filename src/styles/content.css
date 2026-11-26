@@ -122,7 +122,7 @@
 }
 
 #css-root #css-faceit .css-stat:not(.css-faceit-level) {
-    flex: 1 1 0;
+    width: 72px;
 }
 
 #css-root #css-leetify .css-status {
