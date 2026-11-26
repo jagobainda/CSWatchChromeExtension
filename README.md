@@ -6,9 +6,9 @@ A browser extension that shows Counter-Strike stats from csstats.gg, FACEIT and 
 
 Open any Steam profile (`steamcommunity.com/id/*` or `steamcommunity.com/profiles/*`) and the extension adds these sections at the top of the profile:
 
--   **CSSTATS.GG**: current and best Premier rating, plus the last and best CS:GO competitive rank and CS:GO matchmaking wins.
--   **FACEIT**: level, ELO, K/D, win rate, headshot percentage and matches for CS2 and CS:GO, with a warning if the account is banned.
--   **LEETIFY**: Leetify Rating, Aim Rating, Utility Rating, K/D and win rate. Each value is colored by how far it is from the average player, and the ratings show the average value on hover.
+-   **CSSTATS.GG**: wins and current and best Premier rating for every season (the 3 most recent are shown, the rest with "Show all"), plus the last and best CS:GO competitive rank and CS:GO matchmaking wins.
+-   **FACEIT**: level, ELO, K/D, win rate, headshot percentage and matches for CS2 and CS:GO, with a warning if the account is banned. The CS2 stats leave out the CS:GO history that FACEIT migrated into CS2.
+-   **LEETIFY**: Leetify Rating, Aim Rating, Utility Rating, K/D, win rate, crosshair placement, time to damage, headshot kill percentage and accuracy on spotted enemies. Each value is colored by how far it is from the average player, and shows the average value on hover when Leetify provides it.
 -   **ACCOUNT STATS**: Steam account creation date (from the Years of Service badge), FACEIT account creation date, and the number of days between them.
 
 Every section has a link to the player's page on the source site. Sections with stats for both CS2 and CS:GO have a toggle to switch between them, and a button that copies the stats shown to the clipboard. If a source has no data for the player, the section says so instead of showing empty values.

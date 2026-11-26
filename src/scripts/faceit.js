@@ -2,16 +2,42 @@ const GAMES = ['cs2', 'csgo'];
 const PROFILE_URL_PREFIX = 'https://www.faceit.com/';
 
 const STAT_KEYS = Object.freeze({
-    KD: 'Average K/D Ratio',
-    WIN_RATE: 'Win Rate %',
-    HEADSHOTS: 'Average Headshots %',
-    TOTAL_MATCHES: 'Total Matches',
-    MATCHES: 'Matches'
+    MATCHES: 'Matches',
+    WINS: 'Wins',
+    KD_TOTAL: 'K/D Ratio',
+    HEADSHOTS_TOTAL: 'Total Headshots %'
 });
+
+const NO_STATS = Object.freeze({ kd: null, winRate: null, headshots: null, matches: null });
+const NO_LIFETIME = Object.freeze({ lifetime: null });
 
 const toNumber = (value) => value === undefined || value === null || value === '' || !Number.isFinite(Number(value)) ? null : Number(value);
 
-const mapGame = (game, gameData, lifetime = {}) => {
+const mapStats = (lifetime, excluded) => {
+    const total = (key) => {
+        const value = toNumber(lifetime[key]);
+        const subtracted = excluded ? toNumber(excluded[key]) : 0;
+        return value === null || subtracted === null ? null : value - subtracted;
+    };
+    const matchesTotal = total(STAT_KEYS.MATCHES);
+
+    if (matchesTotal === null) return NO_STATS;
+
+    const matches = Math.max(0, matchesTotal);
+    const average = (key, digits = 0, scale = 1) => {
+        const value = total(key);
+        return matches > 0 && value !== null && value >= 0 ? Number((value * scale / matches).toFixed(digits)) : null;
+    };
+
+    return {
+        kd: average(STAT_KEYS.KD_TOTAL, 2),
+        winRate: average(STAT_KEYS.WINS, 0, 100),
+        headshots: average(STAT_KEYS.HEADSHOTS_TOTAL),
+        matches
+    };
+};
+
+const mapGame = (gameData, lifetime, excluded) => {
     if (!gameData) return null;
 
     const level = toNumber(gameData.skill_level);
@@ -19,10 +45,7 @@ const mapGame = (game, gameData, lifetime = {}) => {
     return {
         level: Number.isInteger(level) && level >= 1 && level <= 10 ? level : null,
         elo: toNumber(gameData.faceit_elo),
-        kd: toNumber(lifetime[STAT_KEYS.KD]),
-        winRate: toNumber(lifetime[STAT_KEYS.WIN_RATE]),
-        headshots: toNumber(lifetime[STAT_KEYS.HEADSHOTS]),
-        matches: toNumber(game === 'cs2' ? lifetime[STAT_KEYS.TOTAL_MATCHES] ?? lifetime[STAT_KEYS.MATCHES] : lifetime[STAT_KEYS.MATCHES])
+        ...(lifetime && excluded !== undefined ? mapStats(lifetime, excluded) : NO_STATS)
     };
 };
 
@@ -38,7 +61,11 @@ export const mapFaceitPlayer = ({ player, stats = {}, bans }, now = Date.now()) 
         profileUrl: profileUrl?.startsWith(PROFILE_URL_PREFIX) ? profileUrl : null,
         activatedAt: Date.parse(player.activated_at) || null,
         banned: ban ? { reason: ban.reason ?? null } : null,
-        games: Object.fromEntries(GAMES.map(game => [game, mapGame(game, player.games?.[game], stats[game]?.lifetime)]))
+        games: {
+            // FACEIT's CS2 lifetime stats include the CS:GO history migrated to CS2.
+            cs2: mapGame(player.games?.cs2, stats.cs2?.lifetime, player.games?.csgo ? stats.csgo?.lifetime : null),
+            csgo: mapGame(player.games?.csgo, stats.csgo?.lifetime, null)
+        }
     };
 };
 
@@ -64,6 +91,6 @@ export const fetchFaceitPlayer = async (steamId, getJson) => {
     return mapFaceitPlayer({
         player,
         bans: bans.value,
-        stats: Object.fromEntries(games.map((game, index) => [game, gameStats[index].value]))
+        stats: Object.fromEntries(games.map((game, index) => [game, gameStats[index].reason?.message === 'not_found' ? NO_LIFETIME : gameStats[index].value]))
     });
 };

@@ -16,7 +16,7 @@ const cache = new Map();
 const fetchCSStats = async (steamId) => {
     const data = parseCSStatsBase(await fetchResource(`https://csstats.gg/player/${steamId}`, 'text'));
 
-    if (!data.premier && !data.csgo) throw new Error('not_found');
+    if (!data.premierSeasons.length && !data.csgo) throw new Error('not_found');
 
     return data;
 };

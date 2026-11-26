@@ -15,18 +15,40 @@ const parseRank = (html) => {
 
 const nullIfEmpty = (object) => Object.values(object).some(value => value !== null) ? object : null;
 
-const parsePremier = (html) => {
-    const block = html.match(/class="pm-now">([\s\S]*?)<\/span>\s*<\/div>\s*<\/div>/)?.[1];
-    if (!block) return null;
+const parseSeasonName = (html) => html?.match(/^\s*([^\s<][^<\r\n]{0,19}?)\s*</)?.[1] ?? null;
 
+const parseCurrentSeason = (html) => {
     const cells = Object.fromEntries(
-        block.split('class="pm-c"').slice(1).map(cell => [cell.match(/class="k">([^<]+)</)?.[1], cell])
+        html.split('class="pm-c"').slice(1).map(cell => [cell.match(/class="k">([^<]+)</)?.[1], cell])
     );
 
-    return nullIfEmpty({
+    return {
+        season: parseSeasonName(html.split('class="sec-s">')[1]),
+        wins: toNumber(cells.Wins?.match(/class="num">([^<]+)</)?.[1]),
         current: parseRating(cells.Current),
         best: parseRating(cells.Best)
-    });
+    };
+};
+
+const parsePastSeason = (html) => {
+    const [, current, best] = html.split('class="rk-v"');
+
+    return {
+        season: parseSeasonName(html.split('class="nm">')[1]),
+        wins: toNumber(html.match(/class="rk-w">([^<]*)</)?.[1]),
+        current: parseRating(current),
+        best: parseRating(best)
+    };
+};
+
+const parsePremierSeasons = (html) => {
+    const section = html.match(/class="sec-t">Premier<\/span>([\s\S]*?)(?=<div class="sec[\s"]|<\/div>\s*<script|$)/)?.[1];
+    if (!section) return [];
+
+    const [currentSeason, ...pastSeasons] = section.split(/class="rk-row[^"]*"/);
+
+    return [parseCurrentSeason(currentSeason), ...pastSeasons.map(parsePastSeason)]
+        .filter(({ season, wins, current, best }) => season && [wins, current, best].some(value => value !== null));
 };
 
 const parseCSGO = (html) => {
@@ -43,6 +65,6 @@ const parseCSGO = (html) => {
 };
 
 export const parseCSStatsBase = (html) => ({
-    premier: parsePremier(html),
+    premierSeasons: parsePremierSeasons(html),
     csgo: parseCSGO(html)
 });

@@ -11,6 +11,10 @@ test('summary with positive z-scores', () => {
         leetifyRating: { value: '+3.73', zScore: 2, average: '+0.00' },
         aimRating: { value: '97', zScore: 1, average: '76' },
         utilityRating: { value: '64', zScore: 0, average: '60' },
+        crosshairPlacement: { value: '7.62°', zScore: 0, average: '7.24°' },
+        timeToDamage: { value: '461ms', zScore: 0, average: '498ms' },
+        headshotKills: { value: '47%', zScore: 2, average: '46%' },
+        spottedAccuracy: { value: '39%', zScore: 0, average: '38%' },
         kd: { value: '1.35', zScore: 2, average: null },
         winRate: { value: '60%', zScore: 2, average: null }
     });
@@ -22,6 +26,8 @@ test('summary with negative z-scores', () => {
     assert.deepEqual(summary.leetifyRating, { value: '-1.55', zScore: -2, average: '+0.00' });
     assert.deepEqual(summary.kd, { value: '0.92', zScore: -2, average: null });
     assert.deepEqual(summary.winRate, { value: '43%', zScore: -2, average: null });
+    assert.deepEqual(summary.timeToDamage, { value: '520ms', zScore: 0, average: '535ms' });
+    assert.deepEqual(summary.spottedAccuracy, { value: '40%', zScore: 1, average: '35%' });
 });
 
 test('ratings are found by title and unexpected values are dropped', () => {
@@ -44,5 +50,9 @@ test('plain text 404 is reported as not_found', async (context) => {
 });
 
 test('missing summary maps to no metrics', () => {
-    assert.deepEqual(mapLeetifySummary(null), { leetifyRating: null, aimRating: null, utilityRating: null, kd: null, winRate: null });
+    const summary = mapLeetifySummary(null);
+
+    assert.deepEqual(summary, mapLeetifySummary({}));
+    assert.equal(Object.keys(summary).length, 9);
+    assert.ok(Object.values(summary).every(metric => metric === null));
 });

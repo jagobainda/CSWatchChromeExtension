@@ -1,7 +1,11 @@
-const RATING_TITLES = Object.freeze({
+const METRIC_TITLES = Object.freeze({
     leetifyRating: 'Leetify Rating',
     aimRating: 'Aim Rating',
-    utilityRating: 'Utility Rating'
+    utilityRating: 'Utility Rating',
+    crosshairPlacement: 'Crosshair Placement',
+    timeToDamage: 'Time to Damage',
+    headshotKills: 'Headshot Kill Percentage',
+    spottedAccuracy: 'Accuracy (Enemy Spotted)'
 });
 
 const toShortText = (value) => typeof value === 'string' && /^\S{1,12}$/.test(value) ? value : null;
@@ -15,11 +19,11 @@ const mapMetric = (metric) => {
 };
 
 export const mapLeetifySummary = (summary) => {
-    const { ratings, kdRatio, winRate } = summary ?? {};
-    const ratingList = Array.isArray(ratings) ? ratings : [];
+    const { ratings, aimRatingSkills, aimAuxSkills, kdRatio, winRate } = summary ?? {};
+    const metrics = [ratings, aimRatingSkills, aimAuxSkills].flatMap(list => Array.isArray(list) ? list : []);
 
     return {
-        ...Object.fromEntries(Object.entries(RATING_TITLES).map(([key, title]) => [key, mapMetric(ratingList.find(rating => rating?.title === title))])),
+        ...Object.fromEntries(Object.entries(METRIC_TITLES).map(([key, title]) => [key, mapMetric(metrics.find(metric => metric?.title === title))])),
         kd: mapMetric(kdRatio),
         winRate: mapMetric(winRate)
     };

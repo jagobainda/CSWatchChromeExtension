@@ -23,6 +23,20 @@
     gap: 10px;
 }
 
+#css-root .css-stats > .css-badge {
+    height: 28px;
+    padding: 0 12px;
+    gap: 8px;
+    font-size: 13px;
+    line-height: 1;
+}
+
+#css-root .css-flag {
+    display: block;
+    width: 16px;
+    height: 11px;
+}
+
 #css-root .css-badge-danger {
     color: #e71c1d;
     text-transform: uppercase;
@@ -101,6 +115,16 @@
     gap: 22px;
 }
 
+#css-root #css-leetify .css-stats {
+    display: grid;
+    grid-template-columns: repeat(5, auto);
+}
+
+#css-root #css-leetify .css-status {
+    grid-column: 1 / -1;
+    text-align: center;
+}
+
 #css-root .css-status {
     margin: 0;
 }
@@ -121,6 +145,43 @@
     font-size: 11px;
     color: #afafaf;
     text-transform: uppercase;
+}
+
+#css-root .css-seasons {
+    flex-basis: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px 28px;
+}
+
+#css-root .css-seasons:not(.css-expanded) .css-season-extra {
+    display: none;
+}
+
+#css-root .css-season {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+#css-root .css-season-ratings {
+    display: flex;
+    gap: 8px;
+}
+
+#css-root .css-seasons-toggle {
+    flex-basis: 100%;
+    text-align: center;
+    color: #67c1f5;
+    font-size: 11px;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+#css-root .css-seasons-toggle:hover {
+    color: #fff;
 }
 
 #css-root .css-hidden {

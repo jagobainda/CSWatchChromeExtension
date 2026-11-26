@@ -1,4 +1,6 @@
-const toFlagEmoji = (country) => String.fromCodePoint(...[...country.toUpperCase()].map(letter => 0x1F1A5 + letter.charCodeAt(0)));
+const STEAM_FLAGS_URL = 'https://community.fastly.steamstatic.com/public/images/countryflags/';
+
+const createFlag = (country) => el('img', { className: 'css-flag', src: `${STEAM_FLAGS_URL}${country}.gif`, alt: country.toUpperCase(), title: country.toUpperCase(), onerror: (event) => event.target.remove() });
 
 const formatFaceitGame = (game) => ({
     elo: game?.elo ?? CONSTANTS.PLACEHOLDER,
@@ -34,7 +36,7 @@ const createFaceitSection = (faceitRequest) => {
         section.setAvailableGames(games);
 
         section.render([
-            el('div', { className: 'css-badge' }, country && el('span', { title: country.toUpperCase() }, toFlagEmoji(country)), nickname),
+            el('div', { className: 'css-badge' }, country && createFlag(country), nickname),
             ...CONSTANTS.GAME_TOGGLES.flatMap(({ game }) => createFaceitStats(game, games[game]))
         ], (game) => {
             const { elo, kd, winRate, headshots, matches } = formatFaceitGame(games[game]);
