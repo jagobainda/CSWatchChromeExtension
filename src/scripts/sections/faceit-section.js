@@ -1,55 +1,47 @@
-const getFaceitValues = ({ playerData, stats }, game) => {
-    const { KD, WINRATE, HS, MATCHES } = CONSTANTS.FACEIT_KEYS;
-    const lifetime = stats[game]?.lifetime;
-    const csgoMatches = stats.csgo?.lifetime?.[MATCHES] ?? 0;
+const toFlagEmoji = (country) => String.fromCodePoint(...[...country.toUpperCase()].map(letter => 0x1F1A5 + letter.charCodeAt(0)));
 
-    return {
-        level: playerData.games[game]?.skill_level,
-        elo: playerData.games[game]?.faceit_elo ?? 'N/A',
-        kd: lifetime?.[KD] ?? 'N/A',
-        winRate: `${lifetime?.[WINRATE] ?? 0} %`,
-        hs: `${lifetime?.[HS] ?? 0} %`,
-        matches: String(game === CONSTANTS.GAMES.CS2 ? (stats.cs2?.lifetime?.[MATCHES] ?? 0) - csgoMatches : csgoMatches)
-    };
-};
+const formatFaceitGame = (game) => ({
+    elo: game?.elo ?? CONSTANTS.PLACEHOLDER,
+    kd: game?.kd?.toFixed(2) ?? CONSTANTS.PLACEHOLDER,
+    winRate: game?.winRate != null ? `${game.winRate}%` : CONSTANTS.PLACEHOLDER,
+    headshots: game?.headshots != null ? `${game.headshots}%` : CONSTANTS.PLACEHOLDER,
+    matches: game?.matches?.toLocaleString('en-US') ?? CONSTANTS.PLACEHOLDER
+});
 
-const createFaceitStats = (data, game) => {
-    const { level, elo, kd, winRate, hs, matches } = getFaceitValues(data, game);
+const createFaceitStats = (gameKey, game) => {
+    const { elo, kd, winRate, headshots, matches } = formatFaceitGame(game);
     const valueClass = 'css-text-faceit';
 
     return [
-        el('div', { className: 'css-stat css-faceit-level', dataset: { game } },
-            el('img', { className: 'css-faceit-level-icon', src: chrome.runtime.getURL(`imgs/faceit/${level ? `lvl${level}` : 'unranked'}.svg`), alt: 'Faceit Level' }),
+        el('div', { className: 'css-stat css-faceit-level', dataset: { game: gameKey } },
+            el('img', { className: 'css-faceit-level-icon', src: chrome.runtime.getURL(`imgs/faceit/${game?.level ? `lvl${game.level}` : 'unranked'}.svg`), alt: 'FACEIT level' }),
             el('div', { className: 'css-stat-label css-faceit-elo' }, String(elo))
         ),
-        createStat({ label: 'K/D', value: kd, game, valueClass }),
-        createStat({ label: 'Win rate', value: winRate, game, valueClass }),
-        createStat({ label: 'HS%', value: hs, game, valueClass }),
-        createStat({ label: 'Matches', value: matches, game, valueClass })
+        createStat({ label: 'K/D', value: kd, game: gameKey, valueClass }),
+        createStat({ label: 'Win rate', value: winRate, game: gameKey, valueClass }),
+        createStat({ label: 'HS%', value: headshots, game: gameKey, valueClass }),
+        createStat({ label: 'Matches', value: matches, game: gameKey, valueClass })
     ];
 };
 
 const createFaceitSection = (faceitRequest) => {
-    const section = createSection({ id: 'css-faceit', title: 'FACEIT.COM', logo: 'imgs/logos/faceit-logo.png', games: true });
+    const section = createSection({ id: 'css-faceit', title: 'FACEIT.COM', logo: 'imgs/logos/faceit-logo.png', games: true, emptyMessage: 'No FACEIT account' });
 
-    section.load(faceitRequest, (data) => {
-        const { country, nickname, games } = data.playerData;
-        const banReason = data.bans?.items?.[0]?.reason;
+    section.load(faceitRequest, ({ nickname, country, profileUrl, banned, games }) => {
+        if (profileUrl) section.setLink(profileUrl);
+        if (banned) section.addToHeader(el('div', { className: 'css-badge css-badge-danger' }, banned.reason ? `Banned for ${banned.reason}` : 'Banned'));
 
-        section.setLink(`https://www.faceit.com/es/players/${encodeURIComponent(nickname)}`);
-        if (banReason) section.addToHeader(el('div', { className: 'css-badge css-badge-danger' }, `Banned for ${banReason}`));
-        if (!games.csgo) section.disableGame(CONSTANTS.GAMES.CSGO);
+        CONSTANTS.GAME_TOGGLES.forEach(({ game }) => {
+            if (!games[game]) section.disableGame(game);
+        });
+        if (!games.cs2 && games.csgo) section.selectGame(CONSTANTS.GAMES.CSGO);
 
         section.render([
-            el('div', { className: 'css-badge' },
-                el('img', { className: 'css-flag', src: `https://flagcdn.com/w20/${country.toLowerCase()}.png`, title: country.toLowerCase(), alt: 'Country flag' }),
-                nickname
-            ),
-            ...createFaceitStats(data, CONSTANTS.GAMES.CS2),
-            ...createFaceitStats(data, CONSTANTS.GAMES.CSGO)
+            el('div', { className: 'css-badge' }, country && el('span', { title: country.toUpperCase() }, toFlagEmoji(country)), nickname),
+            ...CONSTANTS.GAME_TOGGLES.flatMap(({ game }) => createFaceitStats(game, games[game]))
         ], (game) => {
-            const { elo, kd, winRate, hs, matches } = getFaceitValues(data, game);
-            return [['Nickname', nickname], ['Elo', elo], ['K/D', kd], ['Win rate', winRate], ['HS', hs], ['Matches', matches]];
+            const { elo, kd, winRate, headshots, matches } = formatFaceitGame(games[game]);
+            return [['Nickname', nickname], ['Elo', elo], ['K/D', kd], ['Win rate', winRate], ['HS', headshots], ['Matches', matches]];
         });
     });
 

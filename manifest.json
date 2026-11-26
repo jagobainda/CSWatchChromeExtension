@@ -51,6 +51,7 @@
   ],
   "host_permissions": [
     "https://csstats.gg/*",
+    "https://open.faceit.com/*",
     "https://steamcommunity.com/*"
   ],
   "web_accessible_resources": [

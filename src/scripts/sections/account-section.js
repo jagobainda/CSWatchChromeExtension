@@ -13,7 +13,7 @@ const createAccountSection = (steamId, steamRequest, faceitRequest) => {
 
     section.load(Promise.allSettled([steamRequest, faceitRequest]), ([steam, faceit]) => {
         const steamCreation = steam.value?.memberSince ?? null;
-        const faceitCreation = Date.parse(faceit.value?.playerData?.activated_at) || null;
+        const faceitCreation = faceit.value?.activatedAt ?? null;
         const steamDate = formatDate(steamCreation);
         const faceitDate = formatDate(faceitCreation);
         const difference = steamCreation !== null && faceitCreation !== null

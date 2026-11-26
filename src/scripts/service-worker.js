@@ -1,5 +1,9 @@
 import { parseCSStatsBase } from './parsers/csstats-parser.js';
 import { parseSteamMemberSince } from './parsers/steam-parser.js';
+import { fetchFaceitPlayer } from './faceit.js';
+
+const FACEIT_API_URL = 'https://open.faceit.com/data/v4';
+const FACEIT_API_KEY = '9b120352-0750-4534-a1d2-e82a4838707e';
 
 const STEAM_ID_PATTERN = /^7656\d{13}$/;
 const TIMEOUT_MS = 10000;
@@ -36,7 +40,11 @@ const fetchSteam = async (steamId) => {
     return { memberSince };
 };
 
-const FETCHERS = { csstats: fetchCSStats, steam: fetchSteam };
+const fetchFaceit = (steamId) => fetchFaceitPlayer(steamId, (path) => fetchResource(`${FACEIT_API_URL}${path}`, 'json', {
+    headers: { Authorization: `Bearer ${FACEIT_API_KEY}` }
+}));
+
+const FETCHERS = { csstats: fetchCSStats, faceit: fetchFaceit, steam: fetchSteam };
 
 const getCached = (type, steamId) => {
     const key = `${type}:${steamId}`;

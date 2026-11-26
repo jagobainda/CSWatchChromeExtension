@@ -24,7 +24,7 @@ const createStat = ({ label, value, game, title, valueClass, style }) => el('div
     el('div', { className: 'css-stat-label' }, label)
 );
 
-const createSection = ({ id, title, href, logo, games = false }) => {
+const createSection = ({ id, title, href, logo, games = false, emptyMessage = ERROR_MESSAGES.not_found }) => {
     let selectedGame = CONSTANTS.GAMES.CS2;
     let copyPairs = () => [];
 
@@ -72,12 +72,13 @@ const createSection = ({ id, title, href, logo, games = false }) => {
             el('div', { className: 'favoritegroup_showcase' }, body)
         ),
         render,
+        selectGame,
         addToHeader: (node) => titleGroup.append(node),
         setLink: (url) => titleGroup.querySelector('.css-link-title').setAttribute('href', url),
         disableGame: (game) => gameButtons.find(button => button.dataset.game === game)?.classList.add('css-disabled'),
         load: (promise, onData) => promise.then(onData).catch(error => {
             gameButtons.forEach(button => button.classList.add('css-disabled'));
-            showMessage(ERROR_MESSAGES[error.message] ?? 'Failed to load data');
+            showMessage(error.message === 'not_found' ? emptyMessage : ERROR_MESSAGES[error.message] ?? 'Failed to load data');
         })
     };
 };

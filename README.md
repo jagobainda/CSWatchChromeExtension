@@ -63,6 +63,7 @@ The manifest keeps the Gecko id `cswatch@jagoba.dev` from the extension's previo
 │   ├── popup.html                   # Popup skeleton
 │   ├── scripts/
 │   │   ├── service-worker.js        # Background (ES module): fetches, parses and caches data
+│   │   ├── faceit.js                # FACEIT Data API lookup and mapping, used by the background
 │   │   ├── parsers/                 # Pure parsers used by the background and the tests
 │   │   ├── content.js               # Entry point on Steam profiles
 │   │   ├── popup.js                 # Popup content
