@@ -45,21 +45,12 @@ body {
     background-color: #c01718;
 }
 
-.btn-green {
-    background-color: #28a745;
-    color: #fff;
-}
-
-.btn-green:hover {
-    background-color: #218838;
-}
-
 .footer {
     margin-top: 20px;
     font-size: 0.85rem;
 }
 
-.footer a, .description a {
+.footer a {
     color: #e71c1d;
     text-decoration: none;
     font-weight: bold;

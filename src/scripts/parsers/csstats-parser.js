@@ -24,7 +24,6 @@ const parsePremier = (html) => {
     );
 
     return nullIfEmpty({
-        wins: toNumber(cells.Wins?.match(/class="num">([^<]+)</)?.[1]),
         current: parseRating(cells.Current),
         best: parseRating(cells.Best)
     });
@@ -47,15 +46,3 @@ export const parseCSStatsBase = (html) => ({
     premier: parsePremier(html),
     csgo: parseCSGO(html)
 });
-
-export const parseCSStatsStats = (html) => {
-    const panel = (heading) => toNumber(html.match(new RegExp(`class="stat-heading">\\s*${heading}\\s*<[\\s\\S]{0,300}?>\\s*([\\d.,]+)`))?.[1]);
-
-    return nullIfEmpty({
-        matches: toNumber(html.match(/class="total-value">([^<]+)</)?.[1]),
-        kd: toNumber(html.match(/class="stat-large"[^>]*>\s*<span[^>]*>([^<]+)</)?.[1]),
-        winRate: panel('Win Rate'),
-        hs: panel('HS%'),
-        adr: panel('ADR')
-    });
-};

@@ -1,76 +1,57 @@
-const createFaceitSection = () => {
-    const { profileCustomization, headerTitle, headerComplementsContainer, favoriteGroupContent } = createSectionStructure();
+const getFaceitValues = ({ playerData, stats }, game) => {
+    const { KD, WINRATE, HS, MATCHES } = CONSTANTS.FACEIT_KEYS;
+    const lifetime = stats[game]?.lifetime;
+    const csgoMatches = stats.csgo?.lifetime?.[MATCHES] ?? 0;
 
-    favoriteGroupContent.id = CONSTANTS.CONTAINER_IDS.FACEIT;
+    return {
+        level: playerData.games[game]?.skill_level,
+        elo: playerData.games[game]?.faceit_elo ?? 'N/A',
+        kd: lifetime?.[KD] ?? 'N/A',
+        winRate: `${lifetime?.[WINRATE] ?? 0} %`,
+        hs: `${lifetime?.[HS] ?? 0} %`,
+        matches: String(game === CONSTANTS.GAMES.CS2 ? (stats.cs2?.lifetime?.[MATCHES] ?? 0) - csgoMatches : csgoMatches)
+    };
+};
 
+const createFaceitStats = (data, game) => {
+    const { level, elo, kd, winRate, hs, matches } = getFaceitValues(data, game);
+    const valueClass = 'css-text-faceit';
 
-    const faceitLinkTitle = CONSTANTS.createLinkTitle('FACEIT.COM', 'faceit-link-title');
-
-    const logoContainer = document.createElement('div');
-    logoContainer.className = 'logo-container';
-
-    const faceitLogo = document.createElement('img');
-    faceitLogo.src = chrome.runtime.getURL('imgs/logos/faceit-logo.png');
-    faceitLogo.alt = 'Faceit Logo';
-
-    const isBanned = document.createElement('div');
-    isBanned.innerText = 'Banned';
-    isBanned.className = 'is-autoflagged';
-    isBanned.id = 'is-banned';
-
-    const faceitUserNicknameContainer = document.createElement('div');
-    faceitUserNicknameContainer.className = 'faceit-user-nickname hidden';
-    faceitUserNicknameContainer.id = 'faceit-user-nickname-container';
-
-    const flagImg = document.createElement('img');
-    flagImg.className = 'faceit_country';
-    flagImg.id = 'faceit-user-flag';
-    flagImg.alt = 'Country flag';
-
-    const nicknameSpan = document.createElement('span');
-    nicknameSpan.id = 'faceit-user-nickname';
-
-    faceitUserNicknameContainer.appendChild(flagImg);
-    faceitUserNicknameContainer.appendChild(nicknameSpan);
-
-    const { csgoButton, cs2Button } = CONSTANTS.createGameToggleButtons('faceit');
-    const copyToClipboard = CONSTANTS.createCopyToClipboardButton('copy-faceit-stats-to-clipboard');
-
-    const levelContainer = document.createElement('div');
-    levelContainer.className = 'stats-item faceit-level-container';
-
-    const levelIcon = document.createElement('img');
-    levelIcon.src = chrome.runtime.getURL('imgs/faceit/unranked.svg');
-    levelIcon.alt = 'Faceit Level';
-    levelIcon.id = 'faceit-stats-level-icon';
-    levelIcon.className = 'faceit-level-icon';
-
-    const levelElo = document.createElement('div');
-    levelElo.innerText = CONSTANTS.PLACEHOLDER;
-    levelElo.id = 'faceit-stats-elo';
-    levelElo.className = 'stats-item-label faceit-elo-label';
-
-    levelContainer.appendChild(levelIcon);
-    levelContainer.appendChild(levelElo);
-
-    const orange = 'text-faceit-orange';
-    const statItems = [
-        CONSTANTS.createStatItem({ id: 'faceit-stats-kd',      label: 'K/D',      valueClasses: orange }),
-        CONSTANTS.createStatItem({ id: 'faceit-stats-winrate',  label: 'Win rate', valueClasses: orange }),
-        CONSTANTS.createStatItem({ id: 'faceit-stats-hs',       label: 'HS%',      valueClasses: orange }),
-        CONSTANTS.createStatItem({ id: 'faceit-stats-matches',  label: 'Matches',  valueClasses: orange }),
+    return [
+        el('div', { className: 'css-stat css-faceit-level', dataset: { game } },
+            el('img', { className: 'css-faceit-level-icon', src: chrome.runtime.getURL(`imgs/faceit/${level ? `lvl${level}` : 'unranked'}.svg`), alt: 'Faceit Level' }),
+            el('div', { className: 'css-stat-label css-faceit-elo' }, String(elo))
+        ),
+        createStat({ label: 'K/D', value: kd, game, valueClass }),
+        createStat({ label: 'Win rate', value: winRate, game, valueClass }),
+        createStat({ label: 'HS%', value: hs, game, valueClass }),
+        createStat({ label: 'Matches', value: matches, game, valueClass })
     ];
+};
 
-    logoContainer.appendChild(faceitLogo);
-    headerTitle.appendChild(logoContainer);
-    headerTitle.appendChild(faceitLinkTitle);
-    headerTitle.appendChild(isBanned);
-    headerComplementsContainer.appendChild(csgoButton);
-    headerComplementsContainer.appendChild(cs2Button);
-    headerComplementsContainer.appendChild(copyToClipboard);
-    favoriteGroupContent.appendChild(faceitUserNicknameContainer);
-    favoriteGroupContent.appendChild(levelContainer);
-    statItems.forEach(item => favoriteGroupContent.appendChild(item));
+const createFaceitSection = (faceitRequest) => {
+    const section = createSection({ id: 'css-faceit', title: 'FACEIT.COM', logo: 'imgs/logos/faceit-logo.png', games: true });
 
-    return profileCustomization;
+    section.load(faceitRequest, (data) => {
+        const { country, nickname, games } = data.playerData;
+        const banReason = data.bans?.items?.[0]?.reason;
+
+        section.setLink(`https://www.faceit.com/es/players/${encodeURIComponent(nickname)}`);
+        if (banReason) section.addToHeader(el('div', { className: 'css-badge css-badge-danger' }, `Banned for ${banReason}`));
+        if (!games.csgo) section.disableGame(CONSTANTS.GAMES.CSGO);
+
+        section.render([
+            el('div', { className: 'css-badge' },
+                el('img', { className: 'css-flag', src: `https://flagcdn.com/w20/${country.toLowerCase()}.png`, title: country.toLowerCase(), alt: 'Country flag' }),
+                nickname
+            ),
+            ...createFaceitStats(data, CONSTANTS.GAMES.CS2),
+            ...createFaceitStats(data, CONSTANTS.GAMES.CSGO)
+        ], (game) => {
+            const { elo, kd, winRate, hs, matches } = getFaceitValues(data, game);
+            return [['Nickname', nickname], ['Elo', elo], ['K/D', kd], ['Win rate', winRate], ['HS', hs], ['Matches', matches]];
+        });
+    });
+
+    return section.element;
 };

@@ -1,20 +1,36 @@
-const createAccountStatsSection = () => {
-    const { profileCustomization, headerTitle, favoriteGroupContent } = createSectionStructure();
+const DAY_MS = 24 * 60 * 60 * 1000;
 
-    favoriteGroupContent.id = 'account-stats-container';
+const formatDate = (timestamp) => timestamp === null
+    ? 'Unknown'
+    : new Date(timestamp).toISOString().slice(0, 10).split('-').reverse().join('-');
 
-    const accountStatsLinkTitle = CONSTANTS.createLinkTitle('ACCOUNT STATS', 'account-stats-link-title', 'https://chromewebstore.google.com/detail/cswatch-stats-viewer/nklafihgaifhoahbfcfiaemfmpoplkch');
+const createAccountSection = (steamRequest, faceitRequest) => {
+    const section = createSection({
+        id: 'css-account',
+        title: 'ACCOUNT STATS',
+        href: 'https://chromewebstore.google.com/detail/cswatch-stats-viewer/nklafihgaifhoahbfcfiaemfmpoplkch'
+    });
 
-    headerTitle.appendChild(accountStatsLinkTitle);
+    section.load(Promise.allSettled([steamRequest, faceitRequest]), ([steam, faceit]) => {
+        const steamCreation = steam.value?.memberSince ?? null;
+        const faceitCreation = Date.parse(faceit.value?.playerData?.activated_at) || null;
+        const steamDate = formatDate(steamCreation);
+        const faceitDate = formatDate(faceitCreation);
+        const difference = steamCreation !== null && faceitCreation !== null
+            ? `${Math.floor((faceitCreation - steamCreation) / DAY_MS)} days`
+            : 'Unknown';
 
-    const statItems = [
-        CONSTANTS.createStatItem({ id: 'account-stats-idle-hours',          label: 'Estimated IDLE hours',  containerTitle: 'Estimation of IDLE hours or hours spent outside official/Faceit servers. Since it is an estimate, it may have a certain margin of error' }),
-        CONSTANTS.createStatItem({ id: 'account-stats-steam-creation',      label: 'Steam creation',        valueClasses: 'text-csstats-blue' }),
-        CONSTANTS.createStatItem({ id: 'account-stats-faceit-creation',     label: 'Faceit creation',       valueClasses: 'text-faceit-orange' }),
-        CONSTANTS.createStatItem({ id: 'account-stats-creation-difference', label: 'Creation difference' }),
-    ];
+        section.render([
+            createStat({
+                label: 'Estimated IDLE hours',
+                value: 'Coming soon',
+                title: 'Estimation of IDLE hours or hours spent outside official/Faceit servers. Since it is an estimate, it may have a certain margin of error'
+            }),
+            createStat({ label: 'Steam creation', value: steamDate, valueClass: 'css-text-csstats' }),
+            createStat({ label: 'Faceit creation', value: faceitDate, valueClass: 'css-text-faceit' }),
+            createStat({ label: 'Creation difference', value: difference })
+        ], () => [['Steam creation', steamDate], ['Faceit creation', faceitDate], ['Creation difference', difference]]);
+    });
 
-    statItems.forEach(item => favoriteGroupContent.appendChild(item));
-
-    return profileCustomization;
+    return section.element;
 };

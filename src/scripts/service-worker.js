@@ -1,4 +1,4 @@
-import { parseCSStatsBase, parseCSStatsStats } from './parsers/csstats-parser.js';
+import { parseCSStatsBase } from './parsers/csstats-parser.js';
 import { parseSteamMemberSince } from './parsers/steam-parser.js';
 
 const STEAM_ID_PATTERN = /^7656\d{13}$/;
@@ -20,17 +20,9 @@ const fetchResource = async (url, read, init = {}) => {
 };
 
 const fetchCSStats = async (steamId) => {
-    const url = `https://csstats.gg/player/${steamId}`;
-    const [base, stats] = await Promise.allSettled([fetchResource(url, 'text'), fetchResource(`${url}/stats`, 'text')]);
+    const data = parseCSStatsBase(await fetchResource(`https://csstats.gg/player/${steamId}`, 'text'));
 
-    if (base.status === 'rejected') throw base.reason;
-
-    const data = {
-        ...parseCSStatsBase(base.value),
-        stats: stats.status === 'fulfilled' ? parseCSStatsStats(stats.value) : null
-    };
-
-    if (!data.premier && !data.csgo && !data.stats) throw new Error('not_found');
+    if (!data.premier && !data.csgo) throw new Error('not_found');
 
     return data;
 };

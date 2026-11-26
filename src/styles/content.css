@@ -1,21 +1,16 @@
-.profile-customization-header-content {
-    display:flex;
+#css-root .css-header {
+    display: flex;
     flex-direction: row;
     justify-content: space-between;
 }
 
-.profile-customization-header-title {
-    display:flex;
+#css-root .css-header-group {
+    display: flex;
     flex-direction: row;
     gap: 10px;
 }
 
-.cs-rep-logo {
-    width: 30px;
-    height: 30px;
-}
-
-.faceit-user-nickname {
+#css-root .css-badge {
     color: white;
     background: #16161670;
     font-size: 12px;
@@ -28,7 +23,12 @@
     gap: 10px;
 }
 
-.logo-container {
+#css-root .css-badge-danger {
+    color: #e71c1d;
+    text-transform: uppercase;
+}
+
+#css-root .css-logo {
     width: 30px;
     height: 30px;
     background: #181818;
@@ -38,12 +38,12 @@
     border-radius: 6px;
 }
 
-.logo-container img {
+#css-root .css-logo img {
     width: 18px;
     height: 18px;
 }
 
-.link-title {
+#css-root .css-link-title {
     display: flex;
     flex-direction: row;
     gap: 5px;
@@ -51,18 +51,7 @@
     font-weight: 400;
 }
 
-.is-autoflagged {
-    color: #e71c1d;
-    background: #16161670;
-    font-size: 12px;
-    text-transform: uppercase;
-    padding: 0 13px;
-    border-radius: 6px;
-    font-weight: 500;
-    display: none;
-}
-
-.header-button {
+#css-root .css-header-button {
     color: #ababab;
     background: #16161670;
     font-size: 12px;
@@ -75,55 +64,69 @@
     align-items: center;
 }
 
-.header-button:hover {
+#css-root .css-header-button:hover {
     color: #fff;
     background: #161616;
     cursor: pointer;
 }
 
-.header-button.selected {
+#css-root .css-header-button.css-selected {
     background-color: rgba(103, 193, 245, 0.2);
-    border-color: #67c1f5;
 }
 
-.header-button.selected:hover {
+#css-root .css-header-button.css-selected:hover {
     background-color: rgba(103, 193, 245, 0.3);
 }
 
-.header-button.disabled {
+#css-root .css-header-button.css-disabled {
     opacity: 0.3;
     cursor: not-allowed;
     pointer-events: none;
 }
 
-.stats-container {
+#css-root .css-game-icon {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+}
+
+#css-root .css-stats {
     padding: 15px !important;
-    height: auto;
+    min-height: 39px;
     display: flex;
     flex-direction: row;
     justify-content: center;
+    align-items: center;
     gap: 22px;
 }
 
-.stats-item {
+#css-root .css-status {
+    margin: 0;
+}
+
+#css-root .css-stat {
     display: flex;
     flex-direction: column;
     align-items: center;
-    max-height: 39px !important;
+    max-height: 39px;
 }
 
-.stats-item-value {
+#css-root .css-stat-value {
     font-size: 16px;
     color: #fff;
 }
 
-.stats-item-label {
+#css-root .css-stat-label {
     font-size: 11px;
     color: #afafaf;
     text-transform: uppercase;
 }
 
-.premiere-rank-badge {
+#css-root .css-hidden {
+    display: none;
+}
+
+#css-root .css-rank-badge {
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
@@ -135,65 +138,32 @@
     justify-content: center;
 }
 
-.faceit-filter-button {
-    background: #1f202c;
-    color: #a8a8a8;
-    border: 1px solid #1f202c;
-    border-radius: 100px;
-    height: 30px;
-    font-size: 13px;
-    margin: auto 0;
-    padding: 4px 12px;
-    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
-    display: none;
-    cursor: pointer;
+#css-root .css-premier-padding {
+    padding: 0 0 2px 6px;
 }
 
-.faceit-filter-button:hover {
-    background: #17181c;
-    color: #ffffff;
+#css-root .css-typography {
+    font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+    font-weight: 700;
+    font-stretch: condensed;
+    letter-spacing: -0.02em;
+    font-size: 1.4em;
 }
 
-.filter-applied {
-    background: #ea580c;
-    color: #ffffff;
+#css-root .css-elo-decimal {
+    font-size: 0.7em;
 }
 
-.filter-applied:hover {
-    background: #c2410c;
-    color: #ffffff;
-}
-
-.analysis-version {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    color: #4ade80;
-    background-color: #16a34a33;
-    border: 1px solid #22c55e4d;
-    border-radius: .375rem;
-    font-size: .75rem;
-    line-height: 1rem;
-    padding: .25rem .5rem;
-    font-weight: 400;
-}
-
-.game-toggle-icon {
-    width: 16px;
-    height: 16px;
-    border-radius: 3px;
-}
-
-.faceit-level-container {
+#css-root .css-faceit-level {
     position: relative;
 }
 
-.faceit-level-icon {
+#css-root .css-faceit-level-icon {
     height: 35px;
     width: auto;
 }
 
-.faceit-elo-label {
+#css-root .css-faceit-elo {
     position: absolute;
     bottom: 0;
     left: 50%;
@@ -201,21 +171,43 @@
     color: white;
 }
 
-.faceit_country {
+#css-root .css-flag {
     width: 20px;
     height: auto;
 }
 
-.premiere-rank-padding {
-    padding: 0 0 2px 6px;
+#css-root .css-text-faceit {
+    color: #fe6d0c;
 }
 
-.elo-decimal {
-    font-size: 0.7em;
+#css-root .css-text-csstats {
+    color: #3873fc;
 }
 
-#cs-rep-stats-container {
-    min-height: 39px;
-    align-items: center;
+#css-root .css-premier-30plus {
+    color: #FED700;
 }
 
+#css-root .css-premier-25_30 {
+    color: #EB4B4B;
+}
+
+#css-root .css-premier-20_25 {
+    color: #D22CE6;
+}
+
+#css-root .css-premier-15_20 {
+    color: #8846FF;
+}
+
+#css-root .css-premier-10_15 {
+    color: #4B69FF;
+}
+
+#css-root .css-premier-5_10 {
+    color: #5E98D7;
+}
+
+#css-root .css-premier-0_5 {
+    color: #B1C3D9;
+}

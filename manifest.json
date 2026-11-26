@@ -24,24 +24,16 @@
       ],
       "js": [
         "src/scripts/utils/constants.js",
+        "src/scripts/utils/dom.js",
         "src/scripts/utils/messaging.js",
-        "src/scripts/sections/csrep-section.js",
+        "src/scripts/utils/section.js",
         "src/scripts/sections/csstats-section.js",
         "src/scripts/sections/faceit-section.js",
         "src/scripts/sections/account-section.js",
-        "src/scripts/parsers/csrep-parser.js",
-        "src/scripts/utils/clipboard-handler.js",
-        "src/scripts/utils/error-handler.js",
-        "src/scripts/utils/conditional-items-handler.js",
-        "src/scripts/info-display/csrep-display.js",
-        "src/scripts/info-display/csstats-display.js",
-        "src/scripts/info-display/faceit-display.js",
-        "src/scripts/info-display/account-display.js",
         "src/scripts/content.js"
       ],
       "css": [
-        "src/styles/content.css",
-        "src/styles/custom-classes.css"
+        "src/styles/content.css"
       ]
     }
   ],
