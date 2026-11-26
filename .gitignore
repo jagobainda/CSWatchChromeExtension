@@ -1,4 +1,5 @@
 .idea
 *.zip
 TODOLIST.txt
-endpoint-example.jsonnode_modules/
+endpoint-example.json
+node_modules/
