@@ -1,104 +1,61 @@
-const parseCSStatsBase = (html) => {
-    if (!html) return null;
-
-    try {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, "text/html");
-
-        const result = {
-            csgo: null,
-            cs2: { last_rank: undefined, best_rank: undefined }
-        };
-
-        const headers = doc.querySelectorAll(".header");
-        let csgoSection = null;
-
-        headers.forEach(header => {
-            const csgoImg = header.querySelector('img[src*="logo-csgo.png"]');
-            if (csgoImg) csgoSection = header.nextElementSibling;
-        });
-
-        if (csgoSection && csgoSection.classList.contains("ranks")) {
-            result.csgo = { last_rank: undefined, best_rank: undefined, wins: undefined };
-
-            const rankElement = csgoSection.querySelector(".rank img");
-            if (rankElement) {
-                const match = rankElement.getAttribute("src")?.match(/\/ranks\/(\d+)\.png/);
-                if (match) result.csgo.last_rank = match[1];
-            }
-
-            const bestElement = csgoSection.querySelector(".best img");
-            if (bestElement) {
-                const match = bestElement.getAttribute("src")?.match(/\/ranks\/(\d+)\.png/);
-                if (match) result.csgo.best_rank = match[1];
-            }
-
-            const winsElement = csgoSection.querySelector(".wins b");
-            if (winsElement) result.csgo.wins = winsElement.textContent.trim();
-        }
-
-        const cs2ratings = doc.querySelectorAll(".cs2rating span");
-        if (cs2ratings[0]) {
-            const main = cs2ratings[0].childNodes[0]?.textContent?.trim();
-            const decimal = cs2ratings[0].querySelector("small")?.textContent?.trim()?.replace(',', '');
-            if (main && decimal) result.cs2.last_rank = { main, decimal, total: main + decimal };
-        }
-
-        if (cs2ratings[1]) {
-            const main = cs2ratings[1].childNodes[0]?.textContent?.trim();
-            const decimal = cs2ratings[1].querySelector("small")?.textContent?.trim()?.replace(',', '');
-            if (main && decimal) result.cs2.best_rank = { main, decimal, total: main + decimal };
-        }
-
-        return result;
-    } catch (error) {
-        console.error('Error parsing CSStats base HTML:', error);
-        return null;
-    }
+const toNumber = (text) => {
+    const value = text?.trim().replace(/,/g, '');
+    return value && /^\d+(\.\d+)?$/.test(value) ? Number(value) : null;
 };
 
-const parseCSStatsCS2 = (html) => {
-    if (!html) return null;
+const parseRating = (html) => {
+    const match = html?.match(/class="cs2rating[^>]*>\s*<span[^>]*>\s*(\d+)\s*(?:<small>,(\d{3})<\/small>)?/);
+    return match ? Number(match[1] + (match[2] ?? '')) : null;
+};
 
-    try {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, "text/html");
+const parseRank = (html) => {
+    const rank = Number(html?.match(/\/ranks\/(\d+)\.png/)?.[1]);
+    return rank >= 1 && rank <= 18 ? rank : null;
+};
 
-        const result = {
-            matches: undefined,
-            kd: undefined,
-            wr: undefined,
-            hs: undefined,
-            adr: undefined
-        };
+const nullIfEmpty = (object) => Object.values(object).some(value => value !== null) ? object : null;
 
-        const matches = doc.querySelector(".total-value");
-        if (matches) result.matches = matches.textContent.trim();
+const parsePremier = (html) => {
+    const block = html.match(/class="pm-now">([\s\S]*?)<\/span>\s*<\/div>\s*<\/div>/)?.[1];
+    if (!block) return null;
 
-        const kd = doc.querySelector(".stat-large span");
-        if (kd) result.kd = kd.textContent.trim();
+    const cells = Object.fromEntries(
+        block.split('class="pm-c"').slice(1).map(cell => [cell.match(/class="k">([^<]+)</)?.[1], cell])
+    );
 
-        doc.querySelectorAll(".stat-panel").forEach(panel => {
-            const heading = panel.querySelector(".stat-heading")?.textContent?.trim();
-            const valueDiv = panel.querySelector(".stat-value") || panel.querySelector("div:nth-of-type(2) > div:nth-of-type(2)");
+    return nullIfEmpty({
+        wins: toNumber(cells.Wins?.match(/class="num">([^<]+)</)?.[1]),
+        current: parseRating(cells.Current),
+        best: parseRating(cells.Best)
+    });
+};
 
-            if (!valueDiv) return;
+const parseCSGO = (html) => {
+    const row = html.match(/class="rk-row is-legacy">([\s\S]*?)<\/div>/)?.[1];
+    if (!row) return null;
 
-            const firstTextNode = Array.from(valueDiv.childNodes).find(node => node.nodeType === Node.TEXT_NODE && node.textContent.trim());
+    const [current, best] = [...row.matchAll(/class="rk-v">([\s\S]*?)<\/span>/g)].map(match => match[1]);
 
-            if (!firstTextNode) return;
+    return nullIfEmpty({
+        wins: toNumber(row.match(/class="rk-w">([^<]*)</)?.[1]),
+        currentRank: parseRank(current),
+        bestRank: parseRank(best)
+    });
+};
 
-            const rawText = firstTextNode.textContent.trim();
-            const numericValue = rawText.replace(/[^0-9.]/g, '');
+export const parseCSStatsBase = (html) => ({
+    premier: parsePremier(html),
+    csgo: parseCSGO(html)
+});
 
-            if (heading === "Win Rate" && numericValue) result.wr = numericValue + "%";
-            if (heading === "HS%" && numericValue) result.hs = numericValue + "%";
-            if (heading === "ADR" && numericValue) result.adr = numericValue;
-        });
+export const parseCSStatsStats = (html) => {
+    const panel = (heading) => toNumber(html.match(new RegExp(`class="stat-heading">\\s*${heading}\\s*<[\\s\\S]{0,300}?>\\s*([\\d.,]+)`))?.[1]);
 
-        return result;
-    } catch (error) {
-        console.error('Error parsing CSStats CS2 HTML:', error);
-        return null;
-    }
+    return nullIfEmpty({
+        matches: toNumber(html.match(/class="total-value">([^<]+)</)?.[1]),
+        kd: toNumber(html.match(/class="stat-large"[^>]*>\s*<span[^>]*>([^<]+)</)?.[1]),
+        winRate: panel('Win Rate'),
+        hs: panel('HS%'),
+        adr: panel('ADR')
+    });
 };

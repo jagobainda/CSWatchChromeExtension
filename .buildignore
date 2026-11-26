@@ -13,3 +13,4 @@ build.bat
 endpoint-example.json
 TODOLIST.txt
 temp_build/
+tests/

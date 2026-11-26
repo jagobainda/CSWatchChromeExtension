@@ -1,10 +1,10 @@
 window.CONSTANTS = window.CONSTANTS || {};
 
-CONSTANTS.state = {
-    responseData: null,
-    faceitResponseData: null,
-    csStatsResponseData: null,
-};
+CONSTANTS.ROOT_ID = 'css-root';
+
+CONSTANTS.STEAM_ID_PATTERN = /^7656\d{13}$/;
+
+CONSTANTS.PLACEHOLDER = '—';
 
 CONSTANTS.GAMES = Object.freeze({
     CS2: 'cs2',
@@ -80,47 +80,27 @@ CONSTANTS.createCopyToClipboardButton = (id) => {
     return btn;
 };
 
-CONSTANTS.waitForElement = (selector, timeoutMs = 5000) => {
-    return new Promise((resolve) => {
-        const existing = document.querySelector(selector);
-        if (existing) {
-            resolve(existing);
-            return;
-        }
-
-        let resolved = false;
-        const observer = new MutationObserver(() => {
-            const el = document.querySelector(selector);
-            if (el && !resolved) {
-                resolved = true;
-                observer.disconnect();
-                resolve(el);
-            }
-        });
-
-        observer.observe(document.documentElement, { childList: true, subtree: true });
-
-        setTimeout(() => {
-            if (!resolved) {
-                resolved = true;
-                observer.disconnect();
-                resolve(null);
-            }
-        }, timeoutMs);
-    });
+CONSTANTS.createLinkTitle = (text, id, href) => {
+    const link = document.createElement('a');
+    link.innerText = text;
+    link.className = 'link-title';
+    link.id = id;
+    if (href) link.href = href;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    return link;
 };
 
-CONSTANTS.createStatItem = ({ id, initialValue = '', label, valueClasses = '', containerClasses = '', dataGame = null, containerTitle = null, bgImage = null }) => {
+CONSTANTS.createStatItem = ({ id, label, valueClasses = '', containerClasses = '', dataGame = null, containerTitle = null }) => {
     const container = document.createElement('div');
     container.className = ['stats-item', containerClasses].filter(Boolean).join(' ');
     if (dataGame) container.dataset.game = dataGame;
     if (containerTitle) container.title = containerTitle;
 
     const valueEl = document.createElement('span');
-    valueEl.innerText = initialValue;
+    valueEl.innerText = CONSTANTS.PLACEHOLDER;
     valueEl.id = id;
     valueEl.className = ['stats-item-value', valueClasses].filter(Boolean).join(' ');
-    if (bgImage) valueEl.style.backgroundImage = bgImage;
 
     const labelEl = document.createElement('div');
     labelEl.innerText = label;

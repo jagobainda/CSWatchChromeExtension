@@ -1,47 +1,82 @@
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === 'fetchPlayerData') {
-        fetch(`https://shapi.jagoba.dev/External/GetPlayerInfo`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(request.userId)
-        })
-            .then(response => {
-                const status = response.status;
-                if (!response.ok) return sendResponse({ success: false, status, error: `HTTP ${status}` });
-                return response.json().then(data => sendResponse({ success: true, status, data }));
-            })
-            .catch(error => sendResponse({ success: false, error: error.message }));
-        return true;
+import { parseCSStatsBase, parseCSStatsStats } from './parsers/csstats-parser.js';
+import { parseSteamMemberSince } from './parsers/steam-parser.js';
+
+const STEAM_ID_PATTERN = /^7656\d{13}$/;
+const TIMEOUT_MS = 10000;
+const CACHE_TTL_MS = 5 * 60 * 1000;
+const ERROR_CODES = new Set(['not_found', 'blocked', 'http', 'timeout', 'invalid']);
+const STATUS_ERRORS = { 403: 'blocked', 404: 'not_found', 429: 'blocked' };
+
+const cache = new Map();
+
+const fetchResource = async (url, read, init = {}) => {
+    try {
+        const response = await fetch(url, { ...init, signal: AbortSignal.timeout(TIMEOUT_MS) });
+        if (!response.ok) throw new Error(STATUS_ERRORS[response.status] ?? 'http');
+        return await response[read]();
+    } catch (error) {
+        throw error.name === 'TimeoutError' ? new Error('timeout') : error;
+    }
+};
+
+const fetchCSStats = async (steamId) => {
+    const url = `https://csstats.gg/player/${steamId}`;
+    const [base, stats] = await Promise.allSettled([fetchResource(url, 'text'), fetchResource(`${url}/stats`, 'text')]);
+
+    if (base.status === 'rejected') throw base.reason;
+
+    const data = {
+        ...parseCSStatsBase(base.value),
+        stats: stats.status === 'fulfilled' ? parseCSStatsStats(stats.value) : null
+    };
+
+    if (!data.premier && !data.csgo && !data.stats) throw new Error('not_found');
+
+    return data;
+};
+
+const fetchFaceit = (steamId) => fetchResource('https://shapi.jagoba.dev/External/GetFaceitCompleteData', 'json', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(steamId)
+});
+
+const fetchSteam = async (steamId) => {
+    const html = await fetchResource(`https://steamcommunity.com/profiles/${steamId}/badges/1?l=english`, 'text');
+    const memberSince = parseSteamMemberSince(html);
+
+    if (memberSince === null) throw new Error('not_found');
+
+    return { memberSince };
+};
+
+const FETCHERS = { csstats: fetchCSStats, faceit: fetchFaceit, steam: fetchSteam };
+
+const getCached = (type, steamId) => {
+    const key = `${type}:${steamId}`;
+    const entry = cache.get(key);
+
+    if (entry && entry.expires > Date.now()) return entry.promise;
+
+    const promise = FETCHERS[type](steamId);
+    cache.set(key, { promise, expires: Date.now() + CACHE_TTL_MS });
+    promise.catch(() => cache.delete(key));
+
+    return promise;
+};
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    const { type, steamId } = message ?? {};
+
+    if (!Object.hasOwn(FETCHERS, type) || typeof steamId !== 'string' || !STEAM_ID_PATTERN.test(steamId)) {
+        sendResponse({ ok: false, error: 'invalid' });
+        return;
     }
 
-    if (request.action === 'fetchFaceitData') {
-        fetch(`https://shapi.jagoba.dev/External/GetFaceitCompleteData`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(request.userId)
-        })
-            .then(response => {
-                const status = response.status;
-                if (!response.ok) return sendResponse({ success: false, status, error: `HTTP ${status}` });
-                return response.json().then(data => sendResponse({ success: true, status, data }));
-            })
-            .catch(error => sendResponse({ success: false, error: error.message }));
-        return true;
-    }
+    getCached(type, steamId).then(
+        data => sendResponse({ ok: true, data }),
+        error => sendResponse({ ok: false, error: ERROR_CODES.has(error.message) ? error.message : 'http' })
+    );
 
-    if (request.action === 'fetchCSStatsData') {
-        const userId = request.userId;
-        const endpoint = request.endpoint || '';
-        const url = `https://csstats.gg/player/${userId}${endpoint}`;
-
-        fetch(url)
-            .then(response => {
-                const status = response.status;
-                if (!response.ok) return sendResponse({ success: false, status, error: `HTTP ${status}` });
-                return response.text().then(html => sendResponse({ success: true, status, data: html }));
-            })
-            .catch(error => sendResponse({ success: false, error: error.message }));
-
-        return true;
-    }
+    return true;
 });

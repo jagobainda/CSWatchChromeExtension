@@ -1,4 +1,4 @@
-const createCSRepSection = () => {
+const createCSRepSection = (steamId) => {
     const { profileCustomization, headerTitle, favoriteGroupContent } = createSectionStructure();
 
     favoriteGroupContent.id = CONSTANTS.CONTAINER_IDS.CSREP;
@@ -8,11 +8,7 @@ const createCSRepSection = () => {
     csRepLogo.className = 'cs-rep-logo';
     csRepLogo.alt = 'CSRep Logo';
 
-    const csRepLinkTitle = document.createElement('a');
-    csRepLinkTitle.target = '_blank';
-    csRepLinkTitle.innerText = 'CSREP.GG';
-    csRepLinkTitle.className = 'link-title';
-    csRepLinkTitle.id = 'cs-rep-link-title';
+    const csRepLinkTitle = CONSTANTS.createLinkTitle('CSREP.GG', 'cs-rep-link-title', `https://csrep.gg/player/${steamId}`);
 
     headerTitle.appendChild(csRepLogo);
     headerTitle.appendChild(csRepLinkTitle);

@@ -1,5 +1,5 @@
-const displayFaceitStats = (responseObject) => {
-    const { playerData, stats } = responseObject.data;
+const displayFaceitStats = (faceitData) => {
+    const { playerData, stats } = faceitData;
     const { country, nickname, games } = playerData;
     const { cs2, csgo } = stats;
 

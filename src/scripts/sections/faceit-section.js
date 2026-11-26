@@ -4,10 +4,7 @@ const createFaceitSection = () => {
     favoriteGroupContent.id = CONSTANTS.CONTAINER_IDS.FACEIT;
 
 
-    const faceitLinkTitle = document.createElement('a');
-    faceitLinkTitle.innerText = 'FACEIT.COM';
-    faceitLinkTitle.className = 'link-title';
-    faceitLinkTitle.id = 'faceit-link-title';
+    const faceitLinkTitle = CONSTANTS.createLinkTitle('FACEIT.COM', 'faceit-link-title');
 
     const logoContainer = document.createElement('div');
     logoContainer.className = 'logo-container';
@@ -49,7 +46,7 @@ const createFaceitSection = () => {
     levelIcon.className = 'faceit-level-icon';
 
     const levelElo = document.createElement('div');
-    levelElo.innerText = '0000';
+    levelElo.innerText = CONSTANTS.PLACEHOLDER;
     levelElo.id = 'faceit-stats-elo';
     levelElo.className = 'stats-item-label faceit-elo-label';
 
@@ -58,10 +55,10 @@ const createFaceitSection = () => {
 
     const orange = 'text-faceit-orange';
     const statItems = [
-        CONSTANTS.createStatItem({ id: 'faceit-stats-kd',      initialValue: '0.00',   label: 'K/D',      valueClasses: orange }),
-        CONSTANTS.createStatItem({ id: 'faceit-stats-winrate',  initialValue: '00.0 %', label: 'Win rate', valueClasses: orange }),
-        CONSTANTS.createStatItem({ id: 'faceit-stats-hs',       initialValue: '00.0 %', label: 'HS%',      valueClasses: orange }),
-        CONSTANTS.createStatItem({ id: 'faceit-stats-matches',  initialValue: '0000',   label: 'Matches',  valueClasses: orange }),
+        CONSTANTS.createStatItem({ id: 'faceit-stats-kd',      label: 'K/D',      valueClasses: orange }),
+        CONSTANTS.createStatItem({ id: 'faceit-stats-winrate',  label: 'Win rate', valueClasses: orange }),
+        CONSTANTS.createStatItem({ id: 'faceit-stats-hs',       label: 'HS%',      valueClasses: orange }),
+        CONSTANTS.createStatItem({ id: 'faceit-stats-matches',  label: 'Matches',  valueClasses: orange }),
     ];
 
     logoContainer.appendChild(faceitLogo);

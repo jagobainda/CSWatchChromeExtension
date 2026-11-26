@@ -1,11 +1,21 @@
-const displayAccountStats = (dataObject) => {
-    const idleHours = document.getElementById('account-stats-idle-hours');
-    const steamCreation = document.getElementById('account-stats-steam-creation');
-    const faceitCreation = document.getElementById('account-stats-faceit-creation');
-    const difference = document.getElementById('account-stats-creation-difference');
+const DAY_MS = 24 * 60 * 60 * 1000;
 
-    if (idleHours) idleHours.innerText = dataObject.idleHours;
-    if (steamCreation) steamCreation.innerText = dataObject.steamCreationDate;
-    if (faceitCreation) faceitCreation.innerText = dataObject.faceitCreationDate;
-    if (difference) difference.innerText = dataObject.dateDifference;
+const formatDate = (timestamp) => timestamp === null
+    ? 'Unknown'
+    : new Date(timestamp).toISOString().slice(0, 10).split('-').reverse().join('-');
+
+const displayAccountStats = ({ steamCreation, faceitCreation }) => {
+    const values = {
+        'account-stats-idle-hours': 'Coming soon',
+        'account-stats-steam-creation': formatDate(steamCreation),
+        'account-stats-faceit-creation': formatDate(faceitCreation),
+        'account-stats-creation-difference': steamCreation !== null && faceitCreation !== null
+            ? `${Math.floor((faceitCreation - steamCreation) / DAY_MS)} days`
+            : 'Unknown'
+    };
+
+    Object.entries(values).forEach(([id, value]) => {
+        const element = document.getElementById(id);
+        if (element) element.innerText = value;
+    });
 };

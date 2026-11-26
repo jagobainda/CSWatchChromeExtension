@@ -1,13 +1,10 @@
-const createCSStatsSection = () => {
+const createCSStatsSection = (steamId) => {
     const { profileCustomization, headerTitle, headerComplementsContainer, favoriteGroupContent } = createSectionStructure();
 
     favoriteGroupContent.id = CONSTANTS.CONTAINER_IDS.CSSTATS;
 
 
-    const csStatsLinkTitle = document.createElement('a');
-    csStatsLinkTitle.innerText = 'CSSTATS.GG';
-    csStatsLinkTitle.className = 'link-title';
-    csStatsLinkTitle.id = 'cs-stats-link-title';
+    const csStatsLinkTitle = CONSTANTS.createLinkTitle('CSSTATS.GG', 'cs-stats-link-title', `https://csstats.gg/player/${steamId}`);
 
     const logoContainer = document.createElement('div');
     logoContainer.className = 'logo-container';
@@ -21,22 +18,20 @@ const createCSStatsSection = () => {
 
     const cs2 = CONSTANTS.GAMES.CS2;
     const csgo = CONSTANTS.GAMES.CSGO;
-    const premierBg = `url('${chrome.runtime.getURL('imgs/premiere/0_5.png')}')`;
-    const csgoBg = `url('${chrome.runtime.getURL('imgs/csgo/1.png')}')`;
     const premierClasses = 'premiere-rank-badge premiere-rank-padding cs-typography';
     const blue = 'text-csstats-blue';
 
     const statItems = [
-        CONSTANTS.createStatItem({ id: 'csstats-stats-premiere-current-elo', initialValue: '---', label: 'Current', valueClasses: premierClasses, containerClasses: 'hidden', dataGame: cs2, bgImage: premierBg }),
-        CONSTANTS.createStatItem({ id: 'csstats-stats-premiere-best-elo',    initialValue: '---', label: 'Best',    valueClasses: premierClasses, containerClasses: 'hidden', dataGame: cs2, bgImage: premierBg }),
-        CONSTANTS.createStatItem({ id: 'csstats-stats-kd',           initialValue: '0.00',    label: 'K/D',        valueClasses: blue, containerClasses: 'hidden', dataGame: cs2 }),
-        CONSTANTS.createStatItem({ id: 'csstats-stats-winrate',       initialValue: '00.0 %',  label: 'Win rate',   valueClasses: blue, containerClasses: 'hidden', dataGame: cs2 }),
-        CONSTANTS.createStatItem({ id: 'csstats-stats-hs',            initialValue: '00.0 %',  label: 'HS%',        valueClasses: blue, containerClasses: 'hidden', dataGame: cs2 }),
-        CONSTANTS.createStatItem({ id: 'csstats-stats-adr',           initialValue: '00',      label: 'ADR',        valueClasses: blue, containerClasses: 'hidden', dataGame: cs2 }),
-        CONSTANTS.createStatItem({ id: 'csstats-stats-matches',       initialValue: '0000',    label: 'Matches',    valueClasses: blue, containerClasses: 'hidden', dataGame: cs2 }),
-        CONSTANTS.createStatItem({ id: 'csstats-last-csgo-rank',      initialValue: '',        label: 'Last',       valueClasses: 'premiere-rank-badge', containerClasses: 'hidden', dataGame: csgo, bgImage: csgoBg }),
-        CONSTANTS.createStatItem({ id: 'csstats-best-csgo-rank',      initialValue: '',        label: 'Best',       valueClasses: 'premiere-rank-badge', containerClasses: 'hidden', dataGame: csgo, bgImage: csgoBg }),
-        CONSTANTS.createStatItem({ id: 'csstats-stats-csgo-matches',  initialValue: '0000',    label: 'CS:GO MM Wins', valueClasses: blue, containerClasses: 'hidden', dataGame: csgo }),
+        CONSTANTS.createStatItem({ id: 'csstats-stats-premiere-current-elo', label: 'Current', valueClasses: premierClasses, containerClasses: 'hidden', dataGame: cs2 }),
+        CONSTANTS.createStatItem({ id: 'csstats-stats-premiere-best-elo',    label: 'Best',    valueClasses: premierClasses, containerClasses: 'hidden', dataGame: cs2 }),
+        CONSTANTS.createStatItem({ id: 'csstats-stats-kd',           label: 'K/D',        valueClasses: blue, containerClasses: 'hidden', dataGame: cs2 }),
+        CONSTANTS.createStatItem({ id: 'csstats-stats-winrate',       label: 'Win rate',   valueClasses: blue, containerClasses: 'hidden', dataGame: cs2 }),
+        CONSTANTS.createStatItem({ id: 'csstats-stats-hs',            label: 'HS%',        valueClasses: blue, containerClasses: 'hidden', dataGame: cs2 }),
+        CONSTANTS.createStatItem({ id: 'csstats-stats-adr',           label: 'ADR',        valueClasses: blue, containerClasses: 'hidden', dataGame: cs2 }),
+        CONSTANTS.createStatItem({ id: 'csstats-stats-matches',       label: 'Matches',    valueClasses: blue, containerClasses: 'hidden', dataGame: cs2 }),
+        CONSTANTS.createStatItem({ id: 'csstats-last-csgo-rank',      label: 'Last',       valueClasses: 'premiere-rank-badge', containerClasses: 'hidden', dataGame: csgo }),
+        CONSTANTS.createStatItem({ id: 'csstats-best-csgo-rank',      label: 'Best',       valueClasses: 'premiere-rank-badge', containerClasses: 'hidden', dataGame: csgo }),
+        CONSTANTS.createStatItem({ id: 'csstats-stats-csgo-matches',  label: 'CS:GO MM Wins', valueClasses: blue, containerClasses: 'hidden', dataGame: csgo }),
     ];
 
     logoContainer.appendChild(csStatsLogo);

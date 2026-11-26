@@ -1,55 +1,51 @@
-const displayCSStatsStats = (responseObject) => {
-    if (!responseObject?.base || !responseObject?.cs2) {
-        showErrorCSStats('Failed to parse CSStats data');
-        return;
-    }
+const setBackgroundImage = (element, path) => {
+    element.style.backgroundImage = `url('${chrome.runtime.getURL(path)}')`;
+};
 
-    const { base, cs2 } = responseObject;
+const displayPremierRating = (id, rating) => {
+    const element = document.getElementById(id);
+    if (!element || rating == null) return;
 
-    const premierLastRankBgString = CONSTANTS.getPremierRankBackground(base.cs2.last_rank?.main);
-    const premierBestRankBgString = CONSTANTS.getPremierRankBackground(base.cs2.best_rank?.main);
+    const thousands = Math.floor(rating / 1000);
+    const background = CONSTANTS.getPremierRankBackground(thousands);
 
-    const premierLastRankBg = document.getElementById('csstats-stats-premiere-current-elo');
-    const premierBestRankBg = document.getElementById('csstats-stats-premiere-best-elo');
+    const decimal = document.createElement('span');
+    decimal.className = 'elo-decimal';
+    decimal.innerText = `,${String(rating % 1000).padStart(3, '0')}`;
 
-    if (premierLastRankBgString && premierLastRankBg) premierLastRankBg.style.backgroundImage = `url('${chrome.runtime.getURL(`imgs/premiere/${premierLastRankBgString}.png`)}')`;
-    if (premierBestRankBgString && premierBestRankBg) premierBestRankBg.style.backgroundImage = `url('${chrome.runtime.getURL(`imgs/premiere/${premierBestRankBgString}.png`)}')`;
+    element.replaceChildren(String(thousands), decimal);
 
-    const csgoLastRankBg = document.getElementById('csstats-last-csgo-rank');
-    const csgoBestRankBg = document.getElementById('csstats-best-csgo-rank');
+    if (!background) return;
 
-    if (csgoLastRankBg && base.csgo) csgoLastRankBg.style.backgroundImage = `url('${chrome.runtime.getURL(`imgs/csgo/${base.csgo.last_rank}.png`)}')`;
-    if (csgoBestRankBg && base.csgo) csgoBestRankBg.style.backgroundImage = `url('${chrome.runtime.getURL(`imgs/csgo/${base.csgo.best_rank}.png`)}')`;
+    element.classList.add(`premiere-${background}`);
+    setBackgroundImage(element, `imgs/premiere/${background}.png`);
+};
 
-    const formatEloWithDecimal = (main, decimal) => {
-        if (!main) return '---';
-        return `${main}<span class="elo-decimal">,${decimal || '0'}</span>`;
+const displayCSGORank = (id, rank) => {
+    const element = document.getElementById(id);
+    if (!element || rank == null) return;
+
+    element.innerText = '';
+    setBackgroundImage(element, `imgs/csgo/${rank}.png`);
+};
+
+const displayCSStatsStats = ({ premier, csgo, stats }) => {
+    displayPremierRating('csstats-stats-premiere-current-elo', premier?.current);
+    displayPremierRating('csstats-stats-premiere-best-elo', premier?.best);
+    displayCSGORank('csstats-last-csgo-rank', csgo?.currentRank);
+    displayCSGORank('csstats-best-csgo-rank', csgo?.bestRank);
+
+    const values = {
+        'csstats-stats-kd': stats?.kd?.toFixed(2),
+        'csstats-stats-winrate': stats?.winRate != null ? `${stats.winRate}%` : null,
+        'csstats-stats-hs': stats?.hs != null ? `${stats.hs}%` : null,
+        'csstats-stats-adr': stats?.adr,
+        'csstats-stats-matches': stats?.matches,
+        'csstats-stats-csgo-matches': csgo?.wins
     };
 
-    const premierCurrentEl = document.getElementById('csstats-stats-premiere-current-elo');
-    const premierBestEl = document.getElementById('csstats-stats-premiere-best-elo');
-
-    if (premierCurrentEl) {
-        premierCurrentEl.innerHTML = formatEloWithDecimal(base.cs2.last_rank?.main, base.cs2.last_rank?.decimal);
-        premierCurrentEl.classList.add(`premiere-${premierLastRankBgString}`)
-    }
-
-    if (premierBestEl) {
-        premierBestEl.innerHTML = formatEloWithDecimal(base.cs2.best_rank?.main, base.cs2.best_rank?.decimal);
-        premierBestEl.classList.add(`premiere-${premierBestRankBgString}`)
-    }
-
-    const elements = {
-        kd: ['csstats-stats-kd', cs2.kd],
-        winrate: ['csstats-stats-winrate', cs2.wr],
-        hs: ['csstats-stats-hs', cs2.hs],
-        adr: ['csstats-stats-adr', cs2.adr],
-        matches: ['csstats-stats-matches', cs2.matches],
-        csgoMatches: ['csstats-stats-csgo-matches', base.csgo?.wins ?? "N/A"]
-    };
-
-    Object.values(elements).forEach(([id, value]) => {
-        const el = document.getElementById(id);
-        if (el && value) el.innerText = value;
+    Object.entries(values).forEach(([id, value]) => {
+        const element = document.getElementById(id);
+        if (element && value != null) element.innerText = String(value);
     });
 };

@@ -23,23 +23,12 @@
         "*://steamcommunity.com/profiles/*"
       ],
       "js": [
-        "src/scripts/steam-context.js"
-      ],
-      "world": "MAIN",
-      "run_at": "document_end"
-    },
-    {
-      "matches": [
-        "*://steamcommunity.com/id/*",
-        "*://steamcommunity.com/profiles/*"
-      ],
-      "js": [
         "src/scripts/utils/constants.js",
+        "src/scripts/utils/messaging.js",
         "src/scripts/sections/csrep-section.js",
         "src/scripts/sections/csstats-section.js",
         "src/scripts/sections/faceit-section.js",
         "src/scripts/sections/account-section.js",
-        "src/scripts/parsers/csstats-parser.js",
         "src/scripts/parsers/csrep-parser.js",
         "src/scripts/utils/clipboard-handler.js",
         "src/scripts/utils/error-handler.js",
@@ -73,6 +62,10 @@
     }
   ],
   "background": {
-    "service_worker": "src/scripts/service-worker.js"
+    "service_worker": "src/scripts/service-worker.js",
+    "scripts": [
+      "src/scripts/service-worker.js"
+    ],
+    "type": "module"
   }
 }

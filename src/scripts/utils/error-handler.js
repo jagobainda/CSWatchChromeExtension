@@ -5,8 +5,7 @@ const showError = (containerId, message) => {
     const error = document.createElement('p');
     error.innerText = message;
 
-    container.innerHTML = '';
-    container.appendChild(error);
+    container.replaceChildren(error);
 };
 
 const showErrorCSRep = (message) => showError(CONSTANTS.CONTAINER_IDS.CSREP, message);
