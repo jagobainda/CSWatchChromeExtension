@@ -121,6 +121,10 @@
     row-gap: 14px;
 }
 
+#css-root #css-faceit .css-stat:not(.css-faceit-level) {
+    flex: 1 1 0;
+}
+
 #css-root #css-leetify .css-status {
     grid-column: 1 / -1;
     text-align: center;
