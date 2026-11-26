@@ -50,12 +50,20 @@ const createSection = ({ id, title, href, logo, games = false, emptyMessage = ER
         if (text) navigator.clipboard.writeText(text).catch(error => console.error('Failed to copy stats to clipboard:', error));
     };
 
+    const copyButton = el('div', { className: 'css-header-button css-disabled', title: 'Copy', onclick: copy }, createClipboardIcon());
+
     const showMessage = (message) => body.replaceChildren(el('p', { className: 'css-status' }, message));
 
     const render = (items, pairs) => {
         body.replaceChildren(...items);
         copyPairs = pairs;
+        copyButton.classList.remove('css-disabled');
         selectGame(selectedGame);
+    };
+
+    const setAvailableGames = (available) => {
+        gameButtons.forEach(button => button.classList.toggle('css-disabled', !available[button.dataset.game]));
+        if (!available[CONSTANTS.GAMES.CS2] && available[CONSTANTS.GAMES.CSGO]) selectGame(CONSTANTS.GAMES.CSGO);
     };
 
     showMessage('Loading…');
@@ -66,16 +74,15 @@ const createSection = ({ id, title, href, logo, games = false, emptyMessage = ER
             el('div', { className: 'profile_customization_header' },
                 el('div', { className: 'css-header' },
                     titleGroup,
-                    el('div', { className: 'css-header-group' }, gameButtons, el('div', { className: 'css-header-button', title: 'Copy', onclick: copy }, createClipboardIcon()))
+                    el('div', { className: 'css-header-group' }, gameButtons, copyButton)
                 )
             ),
             el('div', { className: 'favoritegroup_showcase' }, body)
         ),
         render,
-        selectGame,
+        setAvailableGames,
         addToHeader: (node) => titleGroup.append(node),
         setLink: (url) => titleGroup.querySelector('.css-link-title').setAttribute('href', url),
-        disableGame: (game) => gameButtons.find(button => button.dataset.game === game)?.classList.add('css-disabled'),
         load: (promise, onData) => promise.then(onData).catch(error => {
             gameButtons.forEach(button => button.classList.add('css-disabled'));
             showMessage(error.message === 'not_found' ? emptyMessage : ERROR_MESSAGES[error.message] ?? 'Failed to load data');

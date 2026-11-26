@@ -46,12 +46,17 @@ const FETCHERS = { csstats: fetchCSStats, faceit: fetchFaceit, leetify: fetchLee
 
 const getCached = (type, steamId) => {
     const key = `${type}:${steamId}`;
+    const now = Date.now();
     const entry = cache.get(key);
 
-    if (entry && entry.expires > Date.now()) return entry.promise;
+    if (entry && entry.expires > now) return entry.promise;
+
+    cache.forEach((cached, cachedKey) => {
+        if (cached.expires <= now) cache.delete(cachedKey);
+    });
 
     const promise = FETCHERS[type](steamId);
-    cache.set(key, { promise, expires: Date.now() + CACHE_TTL_MS });
+    cache.set(key, { promise, expires: now + CACHE_TTL_MS });
     promise.catch(() => cache.delete(key));
 
     return promise;

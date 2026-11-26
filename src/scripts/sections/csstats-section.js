@@ -11,7 +11,7 @@ const createPremierStat = (label, rating) => {
         game: CONSTANTS.GAMES.CS2,
         valueClass: `${PREMIER_CLASS} css-premier-${tier}`,
         style: { backgroundImage: assetBackground(`imgs/premiere/${tier}.png`) },
-        value: [String(thousands), el('span', { className: 'css-elo-decimal' }, `,${String(rating % 1000).padStart(3, '0')}`)]
+        value: thousands ? [String(thousands), el('span', { className: 'css-elo-decimal' }, `,${String(rating % 1000).padStart(3, '0')}`)] : String(rating)
     });
 };
 
@@ -33,7 +33,7 @@ const createCSStatsSection = (steamId, csstatsRequest, nickname) => {
     });
 
     section.load(csstatsRequest, ({ premier, csgo }) => {
-        if (!csgo) section.disableGame(CONSTANTS.GAMES.CSGO);
+        section.setAvailableGames({ [CONSTANTS.GAMES.CS2]: premier, [CONSTANTS.GAMES.CSGO]: csgo });
 
         const format = (value) => value?.toLocaleString('en-US') ?? CONSTANTS.PLACEHOLDER;
 
@@ -42,7 +42,7 @@ const createCSStatsSection = (steamId, csstatsRequest, nickname) => {
             createPremierStat('Best', premier?.best),
             createCSGORankStat('Last', csgo?.currentRank),
             createCSGORankStat('Best', csgo?.bestRank),
-            createStat({ label: 'CS:GO MM Wins', value: csgo?.wins, game: CONSTANTS.GAMES.CSGO, valueClass: 'css-text-csstats' })
+            createStat({ label: 'CS:GO MM Wins', value: format(csgo?.wins), game: CONSTANTS.GAMES.CSGO, valueClass: 'css-text-csstats' })
         ], (game) => game === CONSTANTS.GAMES.CS2
             ? [['Nickname', nickname], ['Premier', format(premier?.current)], ['Best', format(premier?.best)]]
             : [['Nickname', nickname], ['Last rank', format(csgo?.currentRank)], ['Best rank', format(csgo?.bestRank)], ['MM wins', format(csgo?.wins)]]);

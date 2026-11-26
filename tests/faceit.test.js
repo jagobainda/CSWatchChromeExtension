@@ -93,3 +93,37 @@ test('unexpected profile url and country are dropped', () => {
     assert.equal(player.profileUrl, null);
     assert.equal(player.country, null);
 });
+
+test('player with CS:GO only is found with the CS:GO lookup', async () => {
+    const { cs2, ...games } = fixture('faceit-player-lookup-csgo').games;
+    const { getJson, requested } = fakeApi({
+        [`/players?game=csgo&game_player_id=${S1MPLE}`]: { ...fixture('faceit-player-lookup-csgo'), games },
+        [`${S1MPLE_PATH}/stats/csgo`]: fixture('faceit-stats-csgo'),
+        [`${S1MPLE_PATH}/bans`]: fixture('faceit-bans')
+    });
+
+    const player = await fetchFaceitPlayer(S1MPLE, getJson);
+
+    assert.deepEqual(player.games, {
+        cs2: null,
+        csgo: { level: 10, elo: 4416, kd: 1.35, winRate: 53, headshots: 47, matches: 4477 }
+    });
+    assert.equal(requested.some(path => path.endsWith('/stats/cs2')), false);
+});
+
+test('expired ban is ignored and active ban is reported', () => {
+    const [ban] = fixture('faceit-bans-banned').items;
+    const bans = { items: [{ ...ban, ends_at: '2025-03-11T17:01:43.849Z' }] };
+    const player = fixture('faceit-player-lookup-cs2');
+
+    assert.equal(mapFaceitPlayer({ player, bans }, Date.UTC(2026, 0, 1)).banned, null);
+    assert.deepEqual(mapFaceitPlayer({ player, bans }, Date.UTC(2024, 11, 1)).banned, { reason: 'multiple accounts' });
+});
+
+test('CS2 matches fall back to Matches when Total Matches is missing', () => {
+    const stats = fixture('faceit-stats-cs2');
+    const { 'Total Matches': totalMatches, ...lifetime } = stats.lifetime;
+    const player = mapFaceitPlayer({ player: fixture('faceit-player-lookup-cs2'), stats: { cs2: { ...stats, lifetime } } });
+
+    assert.equal(player.games.cs2.matches, 5811);
+});

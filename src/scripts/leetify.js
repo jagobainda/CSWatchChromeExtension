@@ -14,7 +14,8 @@ const mapMetric = (metric) => {
     return value === null ? null : { value, zScore: toZScore(metric.zScore), average: toShortText(metric.avg) };
 };
 
-export const mapLeetifySummary = ({ ratings, kdRatio, winRate }) => {
+export const mapLeetifySummary = (summary) => {
+    const { ratings, kdRatio, winRate } = summary ?? {};
     const ratingList = Array.isArray(ratings) ? ratings : [];
 
     return {

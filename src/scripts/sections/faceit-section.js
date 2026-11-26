@@ -31,10 +31,7 @@ const createFaceitSection = (faceitRequest) => {
         if (profileUrl) section.setLink(profileUrl);
         if (banned) section.addToHeader(el('div', { className: 'css-badge css-badge-danger' }, banned.reason ? `Banned for ${banned.reason}` : 'Banned'));
 
-        CONSTANTS.GAME_TOGGLES.forEach(({ game }) => {
-            if (!games[game]) section.disableGame(game);
-        });
-        if (!games.cs2 && games.csgo) section.selectGame(CONSTANTS.GAMES.CSGO);
+        section.setAvailableGames(games);
 
         section.render([
             el('div', { className: 'css-badge' }, country && el('span', { title: country.toUpperCase() }, toFlagEmoji(country)), nickname),

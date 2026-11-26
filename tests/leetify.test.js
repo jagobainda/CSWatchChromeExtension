@@ -42,3 +42,7 @@ test('plain text 404 is reported as not_found', async (context) => {
 
     await assert.rejects(fetchResource('https://api.cs-prod.leetify.com/api/profile/76561197960287930/browser-extension-summary', 'json'), { message: 'not_found' });
 });
+
+test('missing summary maps to no metrics', () => {
+    assert.deepEqual(mapLeetifySummary(null), { leetifyRating: null, aimRating: null, utilityRating: null, kd: null, winRate: null });
+});
