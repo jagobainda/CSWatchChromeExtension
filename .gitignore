@@ -2,3 +2,4 @@
 *.zip
 TODOLIST.txt
 endpoint-example.json
+node_modules/

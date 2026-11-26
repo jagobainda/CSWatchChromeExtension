@@ -1,147 +1,105 @@
-# Counter-Strike Stats Viewer - Chrome Extension
+# Counter-Strike Stats
 
-A Chrome extension that displays Counter-Strike statistics directly on Steam profiles, providing valuable information about players' performance from multiple sources.
+A browser extension that shows Counter-Strike stats from csstats.gg, FACEIT and Leetify directly on Steam profiles. It is a single Manifest V3 code base for every supported browser, written in vanilla JavaScript with no dependencies.
 
-## 🛠️ Installation
+## Features
 
-### From Chrome Web Store
+Open any Steam profile (`steamcommunity.com/id/*` or `steamcommunity.com/profiles/*`) and the extension adds these sections at the top of the profile:
 
-[Install from Chrome Web Store](https://chromewebstore.google.com/detail/cswatch-stats-viewer/nklafihgaifhoahbfcfiaemfmpoplkch)
+- **CSSTATS.GG**: wins and current and best Premier rating for every season (the 3 most recent are shown, the rest with "Show all"), plus the last and best CS:GO competitive rank and CS:GO matchmaking wins.
+- **FACEIT**: level, ELO, K/D, win rate, headshot percentage and matches for CS2 and CS:GO, with a warning if the account is banned. The CS2 stats leave out the CS:GO history that FACEIT migrated into CS2.
+- **LEETIFY**: Leetify Rating, Aim Rating, Utility Rating, K/D, win rate, crosshair placement, time to damage, headshot kill percentage, accuracy on spotted enemies and spray accuracy. Each value is colored by how far it is from the average player, and shows the average value on hover when Leetify provides it.
+- **ACCOUNT STATS**: Steam account creation date (from the Years of Service badge), FACEIT account creation date, and the number of days between them.
 
-### Manual Installation (Developers)
+Every section has a link to the player's page on the source site. Sections with stats for both CS2 and CS:GO have a toggle to switch between them, and a button that copies the stats shown to the clipboard. If a source has no data for the player, the section says so instead of showing empty values.
 
-1. Download or clone this repository:
+### Why csstats.gg no longer shows K/D, HS% or ADR
 
-    ```bash
-    git clone https://github.com/jagobainda/CounterStrikeChromeExtension.git
-    ```
+csstats.gg serves those stats from an endpoint (`/player/{id}/stats`) behind a Cloudflare challenge, which a browser extension cannot pass. Only the public profile page can be read, so the section shows the rank information found there. FACEIT and Leetify cover K/D, win rate and the other performance stats.
 
-2. Open Chrome and navigate to `chrome://extensions/`
+## Installation
 
-3. Enable "Developer mode" in the top right corner
+### From the stores
 
-4. Click "Load unpacked"
+- Chromium-based browsers (Chrome, Edge, Brave, Opera…): [Chrome Web Store](https://chromewebstore.google.com/detail/nklafihgaifhoahbfcfiaemfmpoplkch)
+- Firefox: [Firefox Add-ons](https://addons.mozilla.org/firefox/addon/2947359/)
 
-5. Select the downloaded project folder
+### Unpacked (development)
 
-6. The extension will be ready to use!
+1. Clone the repository:
 
-## 🚀 Features
+   ```bash
+   git clone https://github.com/jagobainda/CounterStrikeStatsExtension.git
+   ```
 
--   **Seamless Integration**: Displays CSRep statistics directly on Steam profiles
--   **Complete Information**: Visualizes key metrics like K/D ratio, reaction time, preaim, aim rating and more
--   **Risk Indicator**: Color-coded system that indicates player risk level
--   **Quick Copy**: Function to copy all statistics to clipboard
--   **Autoflag Detection**: Indicates if a player has been automatically flagged
--   **Direct Link**: Quick access to the complete profile on CSRep
+2. Load it in your browser:
+   - **Chromium-based browsers** (121 or later): open `chrome://extensions/`, enable "Developer mode", click "Load unpacked" and select the project folder.
+   - **Firefox** (140 or later): open `about:debugging#/runtime/this-firefox`, click "Load Temporary Add-on…" and select `manifest.json`.
 
-## 📊 Displayed Metrics
+## Permissions
 
-The extension shows the following statistics:
+| Permission                                                             | Why                                                                            |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| Content scripts on `https://steamcommunity.com/id/*` and `/profiles/*` | Read the profile's SteamID64 and show the stats on the page.                   |
+| `https://steamcommunity.com/*`                                         | Read the account creation date from the profile's Years of Service badge page. |
+| `https://csstats.gg/*`                                                 | Read the player's public csstats.gg page, which has no API or CORS support.    |
+| `https://open.faceit.com/*`                                            | Query the FACEIT Data API.                                                     |
 
--   **K/D Ratio**
--   **Time to Damage**
--   **Preaim Degree**
--   **Aim Rating**
--   **Win Rate**
--   **Risk Rate**
+Leetify's public API allows cross-origin requests, so it needs no extra permission.
 
-Each metric includes a color code that indicates:
+All network requests are made by the background script, which only accepts a valid SteamID64 and a known data source. Responses are kept in memory for 5 minutes. Nothing is stored and there is no server of our own. The only data sent to third parties is the SteamID64 of the profile you are viewing, which goes to Steam, csstats.gg, FACEIT and Leetify. The manifest declares this as `browsingActivity` in `data_collection_permissions`.
 
--   🟢 Green: Normal performance/low risk
--   🟡 Yellow: Suspicious performance/medium risk
--   🟠 Orange: Very suspicious performance/high risk
--   🔴 Red: Extremely suspicious performance/very high risk
+### About the `cswatch@jagoba.dev` id
 
-## 🎮 Usage
+The manifest keeps the Gecko id `cswatch@jagoba.dev` from the extension's previous name. Firefox Add-ons identifies a listing by this id, so changing it would create a new listing, and existing users would stop getting updates.
 
-1. Navigate to any Steam profile (`steamcommunity.com/id/*` or `steamcommunity.com/profiles/*`)
-
-2. The extension will automatically detect the profile and display Counter-Strike statistics if available
-
-## 🔧 Development
-
-### Project Structure
+## Project structure
 
 ```
-CSWatchChromeExtension/
-├── manifest.json               # Extension configuration (Manifest V3)
+├── manifest.json                    # Single Manifest V3 for every browser
+├── build.bat                        # Builds counter-strike-stats-<version>.zip
+├── imgs/                            # Icons, source logos and rank images
 ├── src/
-│   ├── popup.html              # Popup interface
-│   └── scripts/
-│       ├── steam-context.js    # Injects Steam ID into the page
-│       ├── content.js          # Main content script (orchestrates all loaders)
-│       ├── service-worker.js   # Handles external API/fetch requests
-│       ├── sections/
-│       │   ├── account-section.js   # Account section UI builder
-│       │   ├── csrep-section.js     # CSRep section UI builder
-│       │   ├── csstats-section.js   # CSStats section UI builder
-│       │   └── faceit-section.js    # Faceit section UI builder
-│       ├── parsers/
-│       │   ├── csrep-parser.js      # CSRep response parser
-│       │   └── csstats-parser.js    # CSStats HTML parser
-│       ├── info-display/
-│       │   ├── account-display.js   # Renders account info
-│       │   ├── csrep-display.js     # Renders CSRep stats
-│       │   ├── csstats-display.js   # Renders CSStats stats
-│       │   └── faceit-display.js    # Renders Faceit stats
-│       └── utils/
-│           ├── clipboard-handler.js        # Copy-to-clipboard logic
-│           ├── conditional-items-handler.js # Show/hide conditional UI elements
-│           └── error-handler.js            # Error display helpers
-│   └── styles/
-│       ├── content.css         # Content script styles
-│       ├── custom-classes.css  # Utility/custom classes
-│       └── popup.css           # Popup styles
-├── imgs/                       # Extension icons and rank images
-│   ├── csgo/                   # CS:GO rank images
-│   ├── faceit/                 # Faceit level SVGs
-│   ├── premiere/               # CS2 Premier rank backgrounds
-│   ├── logos/                  # Source logos (CSRep, CSStats, Faceit)
-│   └── icons/                  # CS2 / CS:GO game icons
-└── build.bat                   # Build script
+│   ├── popup.html                   # Popup skeleton
+│   ├── scripts/
+│   │   ├── service-worker.js        # Background (ES module): fetches, parses and caches data
+│   │   ├── http.js                  # Shared fetch helper with timeout and error codes
+│   │   ├── faceit.js                # FACEIT Data API lookup and mapping
+│   │   ├── leetify.js               # Leetify summary mapping
+│   │   ├── parsers/                 # Pure parsers used by the background and the tests
+│   │   ├── content.js               # Entry point on Steam profiles
+│   │   ├── popup.js                 # Popup content
+│   │   ├── sections/                # One file per section (build, load and render)
+│   │   └── utils/                   # DOM helper, section pattern, messaging and constants
+│   └── styles/                      # Content (scoped under #css-root) and popup styles
+├── tests/                           # node:test suites and real response fixtures
+└── .github/                         # CI workflow and Dependabot
 ```
 
-### Technologies Used
+The interface is built from JavaScript with a small `el(tag, props, ...children)` helper. External data is only ever inserted as text.
 
--   **Manifest V3**: Latest version of the Chrome extension system
--   **Vanilla JavaScript**: No external dependencies
--   **CSS3**: Modern styles with Steam integration
--   **Chrome Extension APIs**: For complete browser integration
+## Development
 
-## 🤝 Contributing
+You need Node.js 24. The extension itself has no dependencies; npm only installs the development tools ([Prettier](https://prettier.io/) and [web-ext](https://github.com/mozilla/web-ext)):
 
-Contributions are welcome. To contribute:
+```bash
+npm ci
+npm run format        # Format every file with Prettier
+npm run format:check  # Check the formatting without changing files
+npm test              # node:test suites, run against real responses saved in tests/fixtures/
+npm run lint          # Lint the extension with web-ext
+```
 
-1. Fork the project
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+The CI workflow (`.github/workflows/ci.yml`) runs the formatting check, the tests and the lint on every pull request and on every push to `main`. Dependabot keeps the development tools and the GitHub Actions up to date.
 
-## 🔒 Permissions
+## Build
 
-The extension requires the following permissions:
+On Windows, run `build.bat`. It copies the extension files (skipping everything listed in `.buildignore`, including the tests) and creates `counter-strike-stats-<version>.zip` with `tar`. The same zip can be uploaded to both stores.
 
--   `*://steamcommunity.com/*`: To function on Steam Community pages
--   `*://shapi.jagoba.dev/*`: Proxy API for CSRep and Faceit data
--   `*://csstats.gg/*`: To scrape data from CSStats.gg
-
-## ⚖️ License
+## License
 
 This project is under the MIT license. See the [LICENSE](LICENSE) file for more details.
 
-## 📞 Support
+## Disclaimer
 
-If you encounter any issues or have suggestions:
-
--   Report bugs or suggest improvements via [GitHub Issues](https://github.com/jagobainda/CSWatchChromeExtension/issues)
--   Contact the developer: [jagobainda](https://github.com/jagobainda)
-
-## ⚠️ Disclaimer
-
-This extension is not officially affiliated with Steam, Valve Corporation, Faceit, CSRep or CSStats.gg. It is an independent community project created to improve the user experience.
-
----
-
-**Do you like the extension?** ⭐ Give the repository a star!
+This extension is not affiliated with Valve Corporation, Steam, FACEIT, Leetify or csstats.gg. It is an independent community project.

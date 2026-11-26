@@ -1,14 +1,12 @@
 @echo off
-echo Building Chrome extension...
+setlocal
+cd /d "%~dp0"
+echo Building Counter-Strike Stats...
 
-for /f "tokens=2 delims=:" %%a in ('findstr "version" manifest.json') do (
-    set version_line=%%a
-)
-for /f "tokens=1 delims=," %%a in ("%version_line%") do (
-    set version=%%a
-)
+for /f "tokens=2 delims=:" %%a in ('findstr /C:"\"version\":" manifest.json') do set version=%%a
 set version=%version:"=%
 set version=%version: =%
+set version=%version:,=%
 echo Extension version: %version%
 
 if exist "temp_build" rmdir /s /q "temp_build"
@@ -22,44 +20,37 @@ for /f "usebackq tokens=* delims=" %%i in (".buildignore") do (
     call :processLine
 )
 
-robocopy . "temp_build" /E %EXCLUDE_DIRS% %EXCLUDE_FILES%
+robocopy . "temp_build" /E /NFL /NDL /NJH /NJS %EXCLUDE_DIRS% %EXCLUDE_FILES% >nul
 
-set zipName=csrep-chrome-extension-%version%.zip
+set "zipName=counter-strike-stats-%version%.zip"
 echo Creating: %zipName%
 
-if exist "%zipName%" (
-    echo Removing existing %zipName%...
-    del /f "%zipName%" 2>nul
-    timeout /t 1 /nobreak >nul
-)
+if exist "%zipName%" del /f "%zipName%"
 
-powershell "Compress-Archive -Path 'temp_build\*' -DestinationPath '%zipName%' -Force"
+tar -a -c -f "%zipName%" -C "temp_build" *
+set "tarResult=%errorlevel%"
 
 rmdir /s /q "temp_build"
 
+if not "%tarResult%"=="0" (
+    echo Build failed.
+    exit /b 1
+)
+
 echo Extension built successfully: %zipName%
-pause
-exit /b
+
+echo %cmdcmdline% | findstr /I /C:"%~f0" >nul && pause
+exit /b 0
 
 :processLine
 
-set "line=%line:~0,1024%"
 if "%line%"=="" exit /b
 if "%line:~0,1%"=="#" exit /b
-
 
 if "%line:~-1%"=="/" (
     set "EXCLUDE_DIRS=%EXCLUDE_DIRS% /XD %line:~0,-1%"
     exit /b
 )
-
-
-echo %line% | findstr /C:"*" >nul
-if not errorlevel 1 (
-    set "EXCLUDE_FILES=%EXCLUDE_FILES% /XF %line%"
-    exit /b
-)
-
 
 set "EXCLUDE_FILES=%EXCLUDE_FILES% /XF %line%"
 exit /b

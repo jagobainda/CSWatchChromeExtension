@@ -1,0 +1,15 @@
+{
+  "name": "counter-strike-stats",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "web-ext lint --ignore-files tests package.json package-lock.json build.bat",
+    "test": "node --test"
+  },
+  "devDependencies": {
+    "prettier": "3.10.1",
+    "web-ext": "10.8.0"
+  }
+}
