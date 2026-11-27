@@ -12,7 +12,7 @@ csstats.gg · FACEIT · Leetify, right where you check who you're playing with o
 [![Firefox Add-ons](https://img.shields.io/badge/Firefox_Add--ons-Install-FF7139?style=for-the-badge&logo=firefoxbrowser&logoColor=white)](https://addons.mozilla.org/firefox/addon/counter-strike-stats/)
 
 [![CI](https://github.com/jagobainda/CounterStrikeStatsExtension/actions/workflows/ci.yml/badge.svg)](https://github.com/jagobainda/CounterStrikeStatsExtension/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/jagobainda/CounterStrikeStatsExtension?label=release&logo=github)](https://github.com/jagobainda/CounterStrikeStatsExtension/releases/latest)
+[![Release](https://img.shields.io/badge/release-v3.0.0-blue?logo=github)](https://github.com/jagobainda/CounterStrikeStatsExtension/releases/latest)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 <img src="screenshots/counter-strike-stats-1.png" alt="Counter-Strike Stats on a Steam profile" width="860" />
