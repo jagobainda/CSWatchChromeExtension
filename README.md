@@ -59,6 +59,7 @@ The manifest keeps the Gecko id `cswatch@jagoba.dev` from the extension's previo
 ├── manifest.json                    # Single Manifest V3 for every browser
 ├── build.bat                        # Builds counter-strike-stats-<version>.zip
 ├── imgs/                            # Icons, source logos and rank images
+├── screenshots/                     # Store listing screenshots (1280x800)
 ├── src/
 │   ├── popup.html                   # Popup skeleton
 │   ├── scripts/
