@@ -121,6 +121,10 @@
     row-gap: 14px;
 }
 
+#css-root #css-leetify .css-stat-label {
+    white-space: nowrap;
+}
+
 #css-root #css-faceit .css-stat:not(.css-faceit-level) {
     width: 72px;
 }

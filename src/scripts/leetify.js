@@ -1,12 +1,12 @@
 const METRIC_TITLES = Object.freeze({
-    leetifyRating: 'Leetify Rating',
     aimRating: 'Aim Rating',
     utilityRating: 'Utility Rating',
     crosshairPlacement: 'Crosshair Placement',
     timeToDamage: 'Time to Damage',
     headshotKills: 'Headshot Kill Percentage',
     spottedAccuracy: 'Accuracy (Enemy Spotted)',
-    sprayAccuracy: 'Spray Accuracy'
+    sprayAccuracy: 'Spray Accuracy',
+    counterStrafing: 'Proper Counter-Strafing'
 });
 
 const toShortText = (value) => (typeof value === 'string' && /^\S{1,12}$/.test(value) ? value : null);

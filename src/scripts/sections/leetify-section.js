@@ -1,14 +1,14 @@
 const LEETIFY_METRICS = Object.freeze([
-    { key: 'leetifyRating', label: 'Leetify Rating' },
     { key: 'aimRating', label: 'Aim' },
-    { key: 'utilityRating', label: 'Utility' },
-    { key: 'kd', label: 'K/D' },
-    { key: 'winRate', label: 'Win rate' },
-    { key: 'headshotKills', label: 'HS kill %' },
-    { key: 'crosshairPlacement', label: 'Crosshair' },
     { key: 'timeToDamage', label: 'Time to damage' },
+    { key: 'crosshairPlacement', label: 'Crosshair' },
+    { key: 'kd', label: 'K/D' },
+    { key: 'headshotKills', label: 'HS kill %' },
+    { key: 'utilityRating', label: 'Utility' },
+    { key: 'winRate', label: 'Win rate' },
     { key: 'spottedAccuracy', label: 'Accuracy' },
-    { key: 'sprayAccuracy', label: 'Spray accuracy' }
+    { key: 'sprayAccuracy', label: 'Spray accuracy' },
+    { key: 'counterStrafing', label: 'Counter strafing' }
 ]);
 
 const getZScoreClass = (zScore) => (zScore === null ? null : `css-z-${zScore < 0 ? `n${-zScore}` : zScore}`);

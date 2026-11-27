@@ -8,7 +8,6 @@ const fixture = (name) => readFileSync(new URL(`./fixtures/${name}`, import.meta
 
 test('summary with positive z-scores', () => {
     assert.deepEqual(mapLeetifySummary(JSON.parse(fixture('leetify-summary.json'))), {
-        leetifyRating: { value: '+3.73', zScore: 2, average: '+0.00' },
         aimRating: { value: '97', zScore: 1, average: '76' },
         utilityRating: { value: '64', zScore: 0, average: '60' },
         crosshairPlacement: { value: '7.62°', zScore: 0, average: '7.24°' },
@@ -16,6 +15,7 @@ test('summary with positive z-scores', () => {
         headshotKills: { value: '47%', zScore: 2, average: '46%' },
         spottedAccuracy: { value: '39%', zScore: 0, average: '38%' },
         sprayAccuracy: { value: '39%', zScore: 0, average: '32%' },
+        counterStrafing: { value: '87%', zScore: 1, average: '79%' },
         kd: { value: '1.35', zScore: 2, average: null },
         winRate: { value: '60%', zScore: 2, average: null }
     });
@@ -24,7 +24,7 @@ test('summary with positive z-scores', () => {
 test('summary with negative z-scores', () => {
     const summary = mapLeetifySummary(JSON.parse(fixture('leetify-nocsgo-summary.json')));
 
-    assert.deepEqual(summary.leetifyRating, { value: '-1.55', zScore: -2, average: '+0.00' });
+    assert.deepEqual(summary.counterStrafing, { value: '73%', zScore: -1, average: '80%' });
     assert.deepEqual(summary.kd, { value: '0.92', zScore: -2, average: null });
     assert.deepEqual(summary.winRate, { value: '43%', zScore: -2, average: null });
     assert.deepEqual(summary.timeToDamage, { value: '520ms', zScore: 0, average: '535ms' });
@@ -43,7 +43,7 @@ test('ratings are found by title and unexpected values are dropped', () => {
     assert.equal(summary.utilityRating, null);
     assert.deepEqual(summary.aimRating, { value: '50', zScore: 2, average: null });
     assert.deepEqual(summary.kd, { value: '1.00', zScore: null, average: null });
-    assert.equal(summary.leetifyRating, null);
+    assert.equal(summary.counterStrafing, null);
     assert.equal(summary.winRate, null);
 });
 
